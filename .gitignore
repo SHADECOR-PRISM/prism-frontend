@@ -1,0 +1,17 @@
+# ログや一時ファイル
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
+*.log
+
+# 環境変数（将来的にAPIキーとかを入れる場所）
+.env
+.env.local
+
+# ビルド結果
+app/dist/
+
+# Docker関連
+.data/

@@ -1,0 +1,13 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ./app:/var/www/html
+      - prism_node_modules:/var/www/html/node_modules # 名前を付ける！
+    ports:
+      - "3000:5173"
+
+volumes:
+  prism_node_modules:
