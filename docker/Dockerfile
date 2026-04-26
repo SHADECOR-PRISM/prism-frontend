@@ -11,4 +11,4 @@ WORKDIR /var/www/html
 
 # 開発用サーバの起動
 # ViteをDockerで動かすために '--host 0.0.0.0' を強制的に付与します
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+CMD sh -c "if [ ! -d 'node_modules' ]; then npm install; fi && npm run dev -- --host 0.0.0.0"
