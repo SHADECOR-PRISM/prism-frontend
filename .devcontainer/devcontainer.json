@@ -1,27 +1,16 @@
 {
-  "name": "Node.js & TypeScript Development",
-  
-  "dockerComposeFile": [
-    "../docker-compose.yml"
-  ],
-
+  "name": "frontend-devcontainer",
+  "dockerComposeFile": "../docker-compose.yml",
   "service": "frontend",
-  
   "workspaceFolder": "/app",
-
   "customizations": {
     "vscode": {
       "extensions": [
         "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode",
-        "dsznajder.es7-react-js-snippets",
-        "christian-kohler.path-intellisense"
+        "esbenp.prettier-vscode"
       ]
     }
   },
-
   "postCreateCommand": "npm install",
-
-  // コンテナを停止したときに、docker-compose down するかどうか
   "shutdownAction": "none"
 }
