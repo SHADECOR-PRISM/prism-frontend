@@ -1,17 +1,23 @@
-# ログや一時ファイル
+# tempfile
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.DS_Store
 Thumbs.db
-*.log
 
-# 環境変数（将来的にAPIキーとかを入れる場所）
-.env
-.env.local
-
-# ビルド結果
+# build result
 app/dist/
 
-# Docker関連
-.data/
+# Docker
+.docker/
+*.log
+docker-compose.override.yml
+
+# Secrets and environment variables
+.env
+.env.local
+.env.*.local
+
+# IDEs
+.vscode/
+.idea/
+.DS_Store
