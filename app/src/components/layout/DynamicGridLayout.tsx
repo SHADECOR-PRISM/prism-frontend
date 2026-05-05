@@ -5,6 +5,15 @@ import Container from '@mui/material/Container';
 function DynamicGridLayout({ children }: { children: React.ReactNode[] }) {
   const count = children.length;
 
+  // 0つの場合：メッセージ表示
+  if (count === 0) {
+    return (
+      <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <p>表示する要素がありません</p>
+      </Container>
+    );
+  }
+
   const getLayoutStyles = () => {
     // 1つの場合：上下左右中央
     if (count === 1) {
@@ -38,6 +47,7 @@ function DynamicGridLayout({ children }: { children: React.ReactNode[] }) {
         width: '100%',
         height: '100%', 
         p: 2,
+        overflow: 'auto',
         ...getLayoutStyles(),
       }}
     >
