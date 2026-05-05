@@ -7,7 +7,7 @@ import LogIcon from '@mui/icons-material/ViewList'
 import ApplicationIcon from '@mui/icons-material/EditDocument'
 import SettingIcon from '@mui/icons-material/Settings'
 
-function Footer(navState) {
+function Footer() {
   const navigate = useNavigate()
   const location = useLocation()
 
