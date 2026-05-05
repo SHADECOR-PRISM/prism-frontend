@@ -34,7 +34,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* ルートページへのアクセス */}
-        <Route path="/" element={
+        <Route index element={
           isAuthenticated ? <Navigate to="/hello" replace /> : <Navigate to="/login" replace />
         } />
 
