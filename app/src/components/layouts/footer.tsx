@@ -11,8 +11,6 @@ function Footer(navState) {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const value = location.pathname;
-
   return (
     <BottomNavigation
       component="footer"
@@ -23,7 +21,7 @@ function Footer(navState) {
         width: "100%",
         height: "60px"
       }}
-      value={value}
+      value={location.pathname}
       onChange={(event, newValue) => {
         navigate(newValue);
       }}

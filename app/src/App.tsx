@@ -1,5 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { useState, useEffect } from 'react'
 import Login from './pages/login.tsx'
 import Home from './components/layouts/home.tsx'
 import GeneralLog from './pages/requests/log.tsx'

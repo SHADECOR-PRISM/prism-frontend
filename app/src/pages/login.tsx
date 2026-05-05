@@ -13,7 +13,7 @@ function Login({ onLoginSuccess }) {
     e.preventDefault();
     
     try {
-      const auth_response = await apiClient.post("http://localhost:8000/login", {
+      const auth_response = await apiClient.post("/login", {
         userId: userId,
         password: password,
       });
@@ -23,7 +23,7 @@ function Login({ onLoginSuccess }) {
 
       onLoginSuccess();
 
-      navigate("/hello");
+      navigate("/general");
 
     } catch {
       setErrorMessage("Incorrect ID or password");
