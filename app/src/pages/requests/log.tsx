@@ -1,19 +1,33 @@
-import { useNavigate } from 'react-router-dom'
 import { useState, useRef, useEffect } from 'react'
+import dayjs, { Dayjs } from 'dayjs'
 import apiClient from '../../api/axiosInstance'
 import Container from '@mui/material/Container'
 import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
+import DateRangeSelector from '../../components/elements/dateRangeSelector.tsx'
 import LogContainer from '../../components/layouts/logContainer.tsx'
 
-const LIMIT = 30;
+const LIMIT = 10; //一度に読み込む数の制限
 
 function GeneralLog() {
+  const [dateRange, setDateRange] = useState({
+    fromDate: dayjs().subtract(3, "month"),
+    toDate: dayjs()
+  });
   const [logs, setLogs] = useState([]);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const loaderRef = useRef(null);
+
+  // 期間が変わるたびにリセット
+  useEffect(() => {
+    setLogs([]);
+    setOffset(0);
+    setLoading(false);
+    setHasMore(!dateRange.fromDate.isAfter(dateRange.toDate));
+  }, [dateRange]);
 
   // データ取得
   const loadLogs = async () => {
@@ -23,6 +37,7 @@ function GeneralLog() {
 
     try {
       const response = await apiClient.get("/loadLogs", {
+        dateRange: dateRange,
         offset: offset,
         limit: LIMIT
       });
@@ -64,15 +79,17 @@ function GeneralLog() {
 
   return (
     <>
-      <Container>
-        {/* 表示期間指定 */}
+      <Container sx={{ position: "sticky", top: "60px", zIndex: 10, py: "20px", display: "flex", bgcolor: "white" }}>
+        <Box sx={{ flexGrow: 1 }} />
+        <DateRangeSelector dateRange={dateRange} setDateRange={setDateRange} />
       </Container>
       <Container sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
         {logs.map((item) => (
           <LogContainer key={item.id} logData={item} />
         ))}
         {hasMore && <Box ref={loaderRef} />}
-        {loading && <CircularProgress size="30px" color="inherit" aria-label="Loading…" />}
+        {!hasMore && logs.length == 0 && <Typography sx={{ fontSize: "16px", color: "grey" }}>No items</Typography>}
+        {loading && <CircularProgress size="30px" color="grey" aria-label="Loading…" />}
       </Container>
     </>
   )
