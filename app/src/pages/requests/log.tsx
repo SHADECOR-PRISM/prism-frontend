@@ -8,8 +8,6 @@ import CircularProgress from '@mui/material/CircularProgress'
 import DateRangeSelector from '../../components/elements/dateRangeSelector.tsx'
 import LogContainer from '../../components/layouts/logContainer.tsx'
 
-const LIMIT = 10; //一度に読み込む数の制限
-
 function GeneralLog() {
   const [dateRange, setDateRange] = useState({
     fromDate: dayjs().subtract(3, "month"),
@@ -31,21 +29,21 @@ function GeneralLog() {
 
   // データ取得
   const loadLogs = async () => {
-
     if (loading || !hasMore) return;
+
     setLoading(true);
 
-    try {
-      const response = await apiClient.get("/loadLogs", {
-        dateRange: dateRange,
-        offset: offset,
-        limit: LIMIT
-      });
-      
-      setItems((prev) => [...prev, ...response.data]);
+    const start = dateRange.fromDate.startOf("day").toISOString();
+    const end = dateRange.toDate.add(1, "day").startOf("day").toISOString();
 
-      if (response.data.length < LIMIT) {
+    try {
+      const response = await apiClient.get(`/container/me?start=${start}&end=${end}&offset=${offset}`);
+      
+      if (response.data.length == 0) {
         setHasMore(false);
+      } else {
+        setLogs((prev) => [...prev, ...response.data]);
+        setOffset((prev) => prev + response.data.length);
       }
     } catch {
       setHasMore(false);
@@ -55,18 +53,13 @@ function GeneralLog() {
     }
   };
 
-  // offsetが変わるたびに取得
-  useEffect(() => {
-    loadLogs();
-  }, [offset]);
-
   // スクロール監視
   useEffect(() => {
     if (!hasMore) return;
 
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting && !loading) {
-        setOffset((prev) => prev + LIMIT);
+        loadLogs();
       }
     });
 

@@ -13,22 +13,22 @@ function LogContainer({logData}) {
       <Box>
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Typography variant="subtitle1" sx={{ mx: "2px", fontSize: "12px", color: "black" }}>
-            {logData.projectName}
+            {logData.project_name}
           </Typography>
           <Typography variant="body1" sx={{ mx: "2px", fontSize: "12px" }}>
-            {logData.appliedAt}
+            {logData.applied_at}
           </Typography>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <CategoryIcon category={logData.category} />
           <Typography variant="body1" sx={{ mx: "2px", fontSize: "12px" }}>
-            合計:{logData.totalAmount}円
+            合計:{logData.total_amount}円
           </Typography>
         </Box>
       </Box>
       <Box sx={{ flexGrow: 1 }} />
       <Typography variant="caption" sx={{ textAlign: "right", fontSize: "10px", color: "black" }}>
-        {logData.userId}
+        {logData.user_id}
       </Typography>
       <NavigateNextIcon sx={{ width: "30px", height: "30px", color: "gray" }}/>
     </Button>
