@@ -6,7 +6,7 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
 import DateRangeSelector from '../../components/elements/dateRangeSelector.tsx'
-import LogContainer from '../../components/layouts/logContainer.tsx'
+import LogContainer from '../../components/elements/logContainer.tsx'
 
 function GeneralLog() {
   const [dateRange, setDateRange] = useState({
