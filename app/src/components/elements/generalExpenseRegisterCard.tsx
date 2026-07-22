@@ -1,5 +1,4 @@
-import React from 'react';
-import BaseRegisterCard from './BaseRegisterCard';
+import { type ReactNode } from 'react';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
@@ -8,16 +7,18 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
 import UnpublishedIcon from '@mui/icons-material/Unpublished';
 
-interface TransportData {
-  usage_date: string;
-  category: string;
-  remark: string;
-  amount: number;
-  status: 'pending' | 'approved' | 'rejected';
+import BaseRegisterCard from './baseRegisterCard';
+// 先ほど作成した types.ts から型をインポートします
+import { type GeneralExpenseDetail } from '../../../features/accounting/types/expenseTypes';
+
+interface GeneralExpenseRegisterCardProps {
+  data: GeneralExpenseDetail;
+  actionArea: ReactNode;
 }
 
-function TransportRegisterCard({ data, actionArea }: { data: TransportData, actionArea: React.ReactNode }) {
+function GeneralExpenseRegisterCard({ data, actionArea }: GeneralExpenseRegisterCardProps) {
   
+  // ステータスに応じたアイコンを返す関数
   const getStatusIcon = () => {
     switch (data.status) {
       case 'approved':
@@ -50,7 +51,7 @@ function TransportRegisterCard({ data, actionArea }: { data: TransportData, acti
           }}>
             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
               <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                {data.category}
+                {data.category} {/* 消耗品、交際費など */}
               </Typography>
             </Box>
             
@@ -65,12 +66,12 @@ function TransportRegisterCard({ data, actionArea }: { data: TransportData, acti
             sx={{ 
               fontWeight: 500,
               display: '-webkit-box',
-              WebkitLineClamp: 1,
+              WebkitLineClamp: 1, // 摘要が長すぎる場合は1行で省略（...）する
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden'
             }}
           >
-            {data.remark}
+            {data.description} {/* 摘要（何を買ったか）を表示 */}
           </Typography>
 
           <Typography variant="caption" sx={{ color: 'text.primary' }}>
@@ -82,7 +83,7 @@ function TransportRegisterCard({ data, actionArea }: { data: TransportData, acti
         <Box sx={{ 
           mt: 'auto', 
           textAlign: 'left',
-          pr: '130px' // ボタンとの重なり防止
+          pr: '130px' // アクションボタン（Edit/Delete）との重なり防止
         }}>
           <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
             {data.usage_date}
@@ -93,4 +94,4 @@ function TransportRegisterCard({ data, actionArea }: { data: TransportData, acti
   );
 }
 
-export default TransportRegisterCard;
+export default GeneralExpenseRegisterCard;

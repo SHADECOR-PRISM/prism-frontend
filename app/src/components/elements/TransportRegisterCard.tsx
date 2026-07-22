@@ -1,5 +1,5 @@
 import React from 'react';
-import BaseRegisterCard from './BaseRegisterCard';
+import BaseRegisterCard from './baseRegisterCard';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';

@@ -10,42 +10,29 @@ export interface BaseDetail {
 export function useCards<T extends BaseDetail>(initialData: T[] = []) {
   const [cards, setCards] = useState<T[]>(initialData);
 
-  // モーダル等で入力・確定されたデータを受け取ってカードを追加する
-  const addCard = (inputFields: Omit<T, 'id' | 'status'>) => {
-    const newId = `temp-${crypto.randomUUID()}`;
-
-    setCards((prev) => {
-      if (prev.length >= 10) return prev;
-
-      console.log(`[Add] ${newId}`);
-      
-      const newCard = {
-        id: newId,
-        status: 'pending', // 新規追加時は一律で初期ステータスを設定
-        ...inputFields,
-      } as T;
-
-      return [...prev, newCard];
-    });
-  };
-
   // カード削除処理
   const deleteCard = (id: string) => {
     console.log(`[Delete] ${id}`);
+    setCards((prev) => prev.filter(card => card.id !== id));
+  };
+
+  // ✅ これ1つで「新規追加」も「更新」も全て対応！
+  const saveCard = (cardData: T) => {
     setCards((prev) => {
-      const next = prev.filter(card => card.id !== id);
-      console.log(`[Delete] Remaining: ${next.length}`);
-      return next;
+      const isExisting = prev.some((card) => card.id === cardData.id);
+
+      if (isExisting) {
+        // 既存なら上書き
+        console.log(`[Update] ${cardData.id}`);
+        return prev.map((card) => (card.id === cardData.id ? { ...card, ...cardData } : card));
+      } else {
+        // 新規なら追加
+        if (prev.length >= 10) return prev; // 枚数制限
+        console.log(`[Add] ${cardData.id}`);
+        return [...prev, cardData];
+      }
     });
   };
 
-  // カード修正処理
-  const updateCard = (id: string, updatedFields: Partial<T>) => {
-    // console.log(`${id}:${updatedFields}`)
-    setCards((prev) =>
-      prev.map(card => card.id === id ? { ...card, ...updatedFields } : card)
-    );
-  };
-
-  return { cards, setCards, addCard, deleteCard, updateCard };
+  return { cards, setCards, deleteCard, saveCard };
 }
