@@ -9,7 +9,7 @@ import UnpublishedIcon from '@mui/icons-material/Unpublished';
 
 import BaseRegisterCard from './baseRegisterCard';
 // typesから型をインポート
-import { type TransportDetail } from '../../accounting/types/expenseTypes';
+import { type TransportDetail } from '../../features/accounting/types/expenseTypes';
 
 interface TransportRegisterCardProps {
   data: TransportDetail;
