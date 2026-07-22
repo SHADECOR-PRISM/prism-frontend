@@ -160,11 +160,14 @@ export default function GeneralExpenseRegisterModal({
             error={!!errors.category}
             helperText={errors.category}
           >
-            <MenuItem value="備品購入">備品購入</MenuItem>
-            <MenuItem value="レンタカー代">レンタカー代</MenuItem>
-            <MenuItem value="交際費">交際費</MenuItem>
-            <MenuItem value="会議費">会議費</MenuItem>
-            <MenuItem value="その他">その他</MenuItem>
+            <MenuItem value="system_admin">システム管理費</MenuItem>
+            <MenuItem value="supplies">備品・消耗品費</MenuItem>
+            <MenuItem value="software_license">ライセンス・素材費</MenuItem>
+            <MenuItem value="rental">レンタル費</MenuItem>
+            <MenuItem value="travel_expenses">旅費</MenuItem>
+            <MenuItem value="food_beverage">飲食・イベント費</MenuItem>
+            <MenuItem value="service_fee">手数料</MenuItem>
+            <MenuItem value="others">その他雑費</MenuItem>
           </TextField>
 
           {/* 利用用途詳細 (Description) */}

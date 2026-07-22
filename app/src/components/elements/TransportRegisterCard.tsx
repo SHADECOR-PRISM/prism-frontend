@@ -1,5 +1,4 @@
-import React from 'react';
-import BaseRegisterCard from './baseRegisterCard';
+import { type ReactNode } from 'react';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
@@ -8,17 +7,18 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
 import UnpublishedIcon from '@mui/icons-material/Unpublished';
 
-interface TransportData {
-  usage_date: string;
-  category: string;
-  departure: string;
-  arrival: string;
-  is_round_trip: boolean;
-  amount: number;
-  status: 'pending' | 'approved' | 'rejected';
+import BaseRegisterCard from './baseRegisterCard';
+// typesから型をインポート
+import { type TransportDetail } from '../../accounting/types/expenseTypes';
+
+interface TransportRegisterCardProps {
+  data: TransportDetail;
+  actionArea: ReactNode;
 }
 
-function TransportRegisterCard({ data, actionArea }: { data: TransportData, actionArea: React.ReactNode }) {
+function TransportRegisterCard({ data, actionArea }: TransportRegisterCardProps) {
+  
+  // ステータスに応じたアイコンを返す関数
   const getStatusIcon = () => {
     switch (data.status) {
       case 'approved':
@@ -77,6 +77,7 @@ function TransportRegisterCard({ data, actionArea }: { data: TransportData, acti
         <Box sx={{ 
           mt: 'auto', 
           textAlign: 'left',
+          pr: '130px' // ✅ アクションボタン（Edit/Delete）との重なり防止を追加
         }}>
           <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
             {data.usage_date}
@@ -87,4 +88,4 @@ function TransportRegisterCard({ data, actionArea }: { data: TransportData, acti
   );
 }
 
-export default TransportRegisterCard
+export default TransportRegisterCard;

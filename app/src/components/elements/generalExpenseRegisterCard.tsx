@@ -8,8 +8,8 @@ import PendingIcon from '@mui/icons-material/Pending';
 import UnpublishedIcon from '@mui/icons-material/Unpublished';
 
 import BaseRegisterCard from './baseRegisterCard';
-// 先ほど作成した types.ts から型をインポートします
-import { type GeneralExpenseDetail } from '../../../features/accounting/types/expenseTypes';
+// typesから型をインポート
+import { type GeneralExpenseDetail } from '../../accounting/types/expenseTypes';
 
 interface GeneralExpenseRegisterCardProps {
   data: GeneralExpenseDetail;
