@@ -157,10 +157,11 @@ export default function TransportRegisterModal({
             error={!!errors.category}
             helperText={errors.category}
           >
-            <MenuItem value="電車">電車</MenuItem>
-            <MenuItem value="バス">バス</MenuItem>
-            <MenuItem value="タクシー">タクシー</MenuItem>
-            <MenuItem value="飛行機">飛行機</MenuItem>
+            <MenuItem value="train">電車</MenuItem>
+            <MenuItem value="bus">バス</MenuItem>
+            <MenuItem value="taxi">タクシー</MenuItem>
+            <MenuItem value="air">飛行機</MenuItem>
+            <MenuItem value="other">その他</MenuItem>
           </TextField>
 
           <TextField
