@@ -7,11 +7,20 @@ function Home() {
 
   return (
     <>
-      <Header/>
-      <Box component="main" sx={{ pt: "60px", pb: "60px" }}>
-        <Outlet />
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100dvh' }}>
+        <Header/>
+        <Box component="main" sx={{ 
+          pt: "60px", 
+          pb: "60px", 
+          flexGrow: 1,         
+          display: 'flex',     
+          flexDirection: 'column',
+          overflow: 'hidden'   
+        }}>
+          <Outlet />
+        </Box>
+        <Footer/>
       </Box>
-      <Footer/>
     </>
   )
 }

@@ -28,7 +28,7 @@ function DynamicGridLayout({ children }: { children: React.ReactNode[] }) {
     if (count === 2) {
       return {
         display: 'grid',
-        gridTemplateRows: '1fr 1fr',
+        gridTemplateRows: '1fr 1fr', // 高さを均等に半分ずつ使う
         gap: 2,
       };
     }
@@ -47,7 +47,7 @@ function DynamicGridLayout({ children }: { children: React.ReactNode[] }) {
         width: '100%',
         height: '100%', 
         p: 2,
-        overflow: 'auto',
+        overflow: 'hidden',
         ...getLayoutStyles(),
       }}
     >
@@ -60,7 +60,7 @@ function DynamicGridLayout({ children }: { children: React.ReactNode[] }) {
             alignItems: 'center',
             width: '100%',
             height: '100%',
-            aspectRatio: '1/1',
+            minHeight: 0, 
             '& > *': {
               borderRadius: '5%',
               width: '100%',   
@@ -73,8 +73,6 @@ function DynamicGridLayout({ children }: { children: React.ReactNode[] }) {
       ))}
     </Container>
   );
-};
+}
 
 export default DynamicGridLayout;
-
-
