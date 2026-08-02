@@ -7,32 +7,82 @@ import Icon from '../../assets/hero.png'
 import apiClient from '../../api/axiosInstance'
 
 function Header() {
-  const [currentDate, setCurrentDate] = useState("----/--/--");
-  const [userName, setUserName] = useState("----");
+  const [currentDate, setCurrentDate] = useState('----/--/--')
+  const [userName, setUserName] = useState('----')
 
   useEffect(() => {
-    (async () => {
+    ;(async () => {
       try {
-        const response = await apiClient.get("/users/me");
-        setCurrentDate(response.data.current_date);
-        setUserName(response.data.user_name);
+        const response = await apiClient.get('/users/me')
+        setCurrentDate(response.data.current_date)
+        setUserName(response.data.user_name)
       } catch {
-        console.error("Unable to load user information");
+        console.error('Unable to load user information')
       }
-    })();
-  }, []);
+    })()
+  }, [])
 
   return (
-    <AppBar position="fixed" color="inherit" elevation={0}>
-      <Toolbar sx={{ height: "60px" }}>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Box component="img" src={Icon} sx={{ width: "30px", height: "30px", m: "10px" }} />
-          <Typography variant="h1" sx={{ fontSize: "20px" }}>App name</Typography>
+    <AppBar
+      position="static"
+      color="inherit"
+      elevation={0}
+      sx={{
+        borderBottom: '1px solid #E0E0E0',
+      }}
+    >
+      <Toolbar
+        sx={{
+          height: 60,
+          minHeight: '60px !important',
+          px: 2,
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box
+            component="img"
+            src={Icon}
+            sx={{
+              width: 30,
+              height: 30,
+              mr: 1,
+            }}
+          />
+          <Typography
+            variant="h1"
+            sx={{
+              fontSize: 20,
+            }}
+          >
+            App name
+          </Typography>
         </Box>
+
         <Box sx={{ flexGrow: 1 }} />
-        <Box sx={{ textAlign: "right", lineHeight: "10px" }}>
-          <Typography variant="subtitle1" sx={{ fontSize: "10px" }}>{currentDate}</Typography>
-          <Typography variant="subtitle1" sx={{ fontSize: "10px" }}>Normal Acc. / {userName}</Typography>
+
+        <Box
+          sx={{
+            textAlign: 'right',
+            lineHeight: 1.2,
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontSize: 10,
+            }}
+          >
+            {currentDate}
+          </Typography>
+
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontSize: 10,
+            }}
+          >
+            Normal Acc. / {userName}
+          </Typography>
         </Box>
       </Toolbar>
     </AppBar>

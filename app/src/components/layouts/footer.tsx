@@ -1,6 +1,4 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import React, { useState } from 'react'
-import Box from '@mui/material/Box'
 import BottomNavigation from '@mui/material/BottomNavigation'
 import BottomNavigationAction from '@mui/material/BottomNavigationAction'
 import LogIcon from '@mui/icons-material/ViewList'
@@ -14,26 +12,28 @@ function Footer() {
   return (
     <BottomNavigation
       component="footer"
-      sx={{
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        width: "100%",
-        height: "60px"
-      }}
       value={location.pathname}
-      onChange={(event, newValue) => {
-        navigate(newValue);
+      onChange={(_event, newValue) => {
+        navigate(newValue)
+      }}
+      sx={{
+        width: '100%',
+        height: 60,
+        minHeight: 60,
+        flexShrink: 0,
+        borderTop: '1px solid #E0E0E0',
       }}
     >
       <BottomNavigationAction
         icon={<LogIcon />}
         value="/general/log"
       />
+
       <BottomNavigationAction
         icon={<ApplicationIcon />}
         value="/general/application"
       />
+
       <BottomNavigationAction
         icon={<SettingIcon />}
         value="/general/setting"
