@@ -1,13 +1,16 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { useState, useEffect } from 'react'
 import Login from './pages/login.tsx'
-import Home from './components/layouts/home.tsx'
+import HomeWithFooter from './components/layouts/homeWithFooter.tsx'
+import HomeWithoutFooter from './components/layouts/homeWithoutFooter.tsx'
 import GeneralLog from './pages/requests/log.tsx'
 import GeneralApplication from './pages/requests/application.tsx'
 import GeneralSetting from './pages/requests/setting.tsx'
-import Hello from './pages/hello.tsx'
+import GeneralExpensePage from './pages/requests/generalExpensePage.tsx'
+import TransportExpensePage from './pages/requests/transportExpensePage.tsx'
 import apiClient, {setAccessToken} from './api/axiosInstance.tsx'
 import './App.css'
+
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -53,7 +56,7 @@ function App() {
         } />
 
         {/* ホーム画面へのアクセス */}
-        <Route element={<Home />}>
+        <Route element={<HomeWithFooter />}>
           
           {/* 一般ユーザー申請履歴ページへのアクセス */}
           <Route path="/general/log" element={
@@ -71,11 +74,29 @@ function App() {
           } />
 
         </Route>
+
+
+
+        {/* フッター無しレイアウトへのアクセス */}
+        <Route element={<HomeWithoutFooter />}>
+
+          {/* 交通費申請ページへのアクセス */}
+          <Route path="/general/application/transport" element={
+            isAuthenticated ? <TransportExpensePage /> : <Navigate to="/login" replace />
+          } />
+
+          {/* 経費申請ページへのアクセス */}
+          <Route path="/general/application/expense" element={
+            isAuthenticated ? <GeneralExpensePage /> : <Navigate to="/login" replace />
+          } />
+
+        </Route>
         
+
         {/* 機能ページへの直接的なアクセス */}
         {/* 今後機能を追加する場合はここにルータを追加する */}
         <Route path="/hello" element={
-          isAuthenticated ? <Hello /> : <Navigate to="/login" replace />
+          isAuthenticated ? <GeneralExpensePage /> : <Navigate to="/login" replace />
         } />
         
         {/* どこにも当てはまらない場合 */}
