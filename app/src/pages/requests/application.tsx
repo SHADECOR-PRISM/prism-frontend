@@ -12,7 +12,6 @@ function GeneralApplication() {
       {/* 1つ目のボタン：交通費申請 */}
       <Button
         variant="contained"
-        // ✅ App.tsx で定義した path に変更
         onClick={() => navigate('/general/application/transport')} 
         sx={{
           backgroundColor: '#FFFFFF',
@@ -30,7 +29,6 @@ function GeneralApplication() {
       {/* 2つ目のボタン：経費申請 */}
       <Button
         variant="contained"
-        // ✅ App.tsx で定義した path に変更
         onClick={() => navigate('/general/application/expense')} 
         sx={{
           backgroundColor: '#FFFFFF',
