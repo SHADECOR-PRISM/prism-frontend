@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -39,6 +39,14 @@ const defaultData: GeneralExpenseModalData = {
   created_at: null,
 };
 
+// タッチ状態の型定義
+type TouchedFields = {
+  usage_date?: boolean;
+  category?: boolean;
+  description?: boolean;
+  amount?: boolean;
+};
+
 export default function GeneralExpenseRegisterModal({
   open,
   initialData,
@@ -48,7 +56,9 @@ export default function GeneralExpenseRegisterModal({
   // フォームの入力状態
   const [formData, setFormData] = useState<GeneralExpenseModalData>(defaultData);
   const [amountInput, setAmountInput] = useState<string>('0');
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // 各フィールドのタッチ（フォーカス離脱）状態
+  const [touched, setTouched] = useState<TouchedFields>({});
 
   // 以前のopen状態を保持（useEffectの代わり）
   const [prevOpen, setPrevOpen] = useState(false);
@@ -58,18 +68,22 @@ export default function GeneralExpenseRegisterModal({
     const mergedData = { ...defaultData, ...initialData };
     setFormData(mergedData);
     setAmountInput(mergedData.amount ? mergedData.amount.toString() : '0');
-    setErrors({});
+
+    // 編集時は最初から値を保持しているため必要に応じて調整。新規時は全てuntouchedで初期化
+    setTouched({});
     setPrevOpen(true);
   } else if (!open && prevOpen) {
     setPrevOpen(false);
   }
 
+  // フィールドを触った（フォーカスが外れた）記録をつけるハンドラー
+  const handleBlur = (field: keyof TouchedFields) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  };
+
   // 入力ハンドラー
   const handleChange = (field: keyof GeneralExpenseModalData, value: string | number | boolean | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
   };
 
   // 金額入力ハンドラー
@@ -77,35 +91,35 @@ export default function GeneralExpenseRegisterModal({
     const value = e.target.value;
     if (value === '' || /^[0-9]+$/.test(value)) {
       setAmountInput(value);
-      if (errors.amount) {
-        setErrors((prev) => ({ ...prev, amount: undefined }));
-      }
     }
   };
 
-  // バリデーションチェック
-  const validate = (): boolean => {
-    const newErrors: { [key: string]: string } = {};
-
-    if (!formData.usage_date) newErrors.usage_date = '利用日を選択してください';
-    if (!formData.category) newErrors.category = '申請種別を選択してください';
-    
-    // 必須チェック ＆ 100文字超過チェック
-    if (!formData.description?.trim()) {
-      newErrors.description = '利用用途詳細を入力してください';
-    } else if (formData.description.length > 100) {
-      newErrors.description = '100文字以内で入力してください';
-    }
-    
-    if (amountInput === '' || isNaN(Number(amountInput))) newErrors.amount = '金額を入力してください';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  // ==========================================
+  // 各項目のバリデーションチェック関数
+  // ==========================================
+  const getUsageDateError = () => (!formData.usage_date ? '利用日を選択してください' : '');
+  const getCategoryError = () => (!formData.category ? '申請種別を選択してください' : '');
+  const getDescriptionError = () => {
+    if (!formData.description?.trim()) return '利用用途詳細を入力してください';
+    if (formData.description.length > 100) return '100文字以内で入力してください';
+    return '';
   };
+  const getAmountError = () => {
+    if (amountInput === '' || isNaN(Number(amountInput))) return '金額を入力してください';
+    if (Number(amountInput) <= 0) return '1円以上の金額を入力してください';
+    return '';
+  };
+
+  // フォーム全体が有効かどうか（ボタン有効化のフラグ）
+  const isValid =
+    !getUsageDateError() &&
+    !getCategoryError() &&
+    !getDescriptionError() &&
+    !getAmountError();
 
   // 適用ボタン処理
   const handleApply = () => {
-    if (!validate()) return;
+    if (!isValid) return;
 
     const finalData: GeneralExpenseModalData = {
       ...formData,
@@ -146,8 +160,9 @@ export default function GeneralExpenseRegisterModal({
             slotProps={{ inputLabel: { shrink: true } }}
             value={formData.usage_date || ''}
             onChange={(e) => handleChange('usage_date', e.target.value)}
-            error={!!errors.usage_date}
-            helperText={errors.usage_date}
+            onBlur={() => handleBlur('usage_date')}
+            error={!!touched.usage_date && !!getUsageDateError()}
+            helperText={touched.usage_date ? getUsageDateError() : ''}
           />
 
           {/* 申請種別 (カテゴリー) */}
@@ -157,8 +172,9 @@ export default function GeneralExpenseRegisterModal({
             fullWidth
             value={formData.category || ''}
             onChange={(e) => handleChange('category', e.target.value)}
-            error={!!errors.category}
-            helperText={errors.category}
+            onBlur={() => handleBlur('category')}
+            error={!!touched.category && !!getCategoryError()}
+            helperText={touched.category ? getCategoryError() : ''}
           >
             <MenuItem value="system_admin">システム管理費</MenuItem>
             <MenuItem value="supplies">備品・消耗品費</MenuItem>
@@ -175,21 +191,24 @@ export default function GeneralExpenseRegisterModal({
             label="利用用途詳細"
             fullWidth
             multiline
-            rows={3} // 複数行入力しやすく
+            rows={3}
             placeholder="例: 〇〇プロジェクト用 モニター購入"
             value={formData.description || ''}
             onChange={(e) => {
-              // 100文字以下の時だけStateを更新する（100文字を超えたコピペ等の防止）
               if (e.target.value.length <= 100) {
                 handleChange('description', e.target.value);
               }
             }}
-            error={!!errors.description}
-            // エラー時はエラー文を、通常時は文字数カウンターを表示
-            helperText={errors.description || `${(formData.description || '').length}/100文字`}
+            onBlur={() => handleBlur('description')}
+            error={!!touched.description && !!getDescriptionError()}
+            helperText={
+              touched.description && getDescriptionError()
+                ? getDescriptionError()
+                : `${(formData.description || '').length}/100文字`
+            }
             slotProps={{ 
               inputLabel: { shrink: true },
-              htmlInput: { maxLength: 100 } // HTMLレベルで100文字以上打てないように制限
+              htmlInput: { maxLength: 100 }
             }}
           />
 
@@ -199,8 +218,9 @@ export default function GeneralExpenseRegisterModal({
             fullWidth
             value={amountInput}
             onChange={handleAmountChange}
-            error={!!errors.amount}
-            helperText={errors.amount}
+            onBlur={() => handleBlur('amount')}
+            error={!!touched.amount && !!getAmountError()}
+            helperText={touched.amount ? getAmountError() : ''}
             slotProps={{ htmlInput: { inputMode: 'numeric', pattern: '[0-9]*' } }}
           />
         </Stack>
@@ -210,6 +230,7 @@ export default function GeneralExpenseRegisterModal({
         <Button 
           variant="contained" 
           fullWidth 
+          disabled={!isValid}
           onClick={handleApply}
           sx={{ 
             backgroundColor: '#000000', 
@@ -217,7 +238,11 @@ export default function GeneralExpenseRegisterModal({
             py: 1.5,
             fontWeight: 'bold',
             borderRadius: '8px',
-            '&:hover': { backgroundColor: '#333333' }
+            '&:hover': { backgroundColor: '#333333' },
+            '&.Mui-disabled': {
+              backgroundColor: '#E0E0E0',
+              color: '#A0A0A0',
+            },
           }}
         >
           適用 (Apply)

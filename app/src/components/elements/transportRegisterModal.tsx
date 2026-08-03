@@ -43,6 +43,15 @@ const defaultData: TransportModalData = {
   created_at: null,
 };
 
+// タッチ状態の型定義
+type TouchedFields = {
+  usage_date?: boolean;
+  category?: boolean;
+  departure?: boolean;
+  arrival?: boolean;
+  amount?: boolean;
+};
+
 export default function TransportRegisterModal({
   open,
   initialData,
@@ -52,29 +61,34 @@ export default function TransportRegisterModal({
   // フォームの入力状態
   const [formData, setFormData] = useState<TransportModalData>(defaultData);
   const [amountInput, setAmountInput] = useState<string>('0');
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  
+  // 各フィールドのタッチ（フォーカス離脱）状態
+  const [touched, setTouched] = useState<TouchedFields>({});
 
-  // ✅ 修正ポイント: useEffectの代わりに、前回のopen状態をStateで保持する
+  // 前回のopen状態をStateで保持する
   const [prevOpen, setPrevOpen] = useState(false);
 
-  // ✅ 修正ポイント: openが false -> true に切り替わった瞬間に初期値をセットする
+  // モーダルが開いた瞬間に状態をリセット
   if (open && !prevOpen) {
     const mergedData = { ...defaultData, ...initialData };
     setFormData(mergedData);
     setAmountInput(mergedData.amount ? mergedData.amount.toString() : '0');
-    setErrors({});
+    
+    // 編集時は最初から値を保持しているため必要に応じて調整。新規時は全てuntouchedで初期化
+    setTouched({});
     setPrevOpen(true);
   } else if (!open && prevOpen) {
-    // 閉じた時に状態を更新
     setPrevOpen(false);
   }
+
+  // フィールドを触った（フォーカスが外れた）記録をつけるハンドラー
+  const handleBlur = (field: keyof TouchedFields) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  };
 
   // 入力ハンドラー
   const handleChange = (field: keyof TransportModalData, value: string | number | boolean | null) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
   };
 
   // 金額入力ハンドラー
@@ -82,29 +96,33 @@ export default function TransportRegisterModal({
     const value = e.target.value;
     if (value === '' || /^[0-9]+$/.test(value)) {
       setAmountInput(value);
-      if (errors.amount) {
-        setErrors((prev) => ({ ...prev, amount: undefined }));
-      }
     }
   };
 
-  // バリデーションチェック
-  const validate = (): boolean => {
-    const newErrors: { [key: string]: string } = {};
-
-    if (!formData.usage_date) newErrors.usage_date = '利用日を選択してください';
-    if (!formData.category) newErrors.category = '交通手段を選択してください';
-    if (!formData.departure?.trim()) newErrors.departure = '出発地を入力してください';
-    if (!formData.arrival?.trim()) newErrors.arrival = '到着地を入力してください';
-    if (amountInput === '' || isNaN(Number(amountInput))) newErrors.amount = '金額を入力してください';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  // ==========================================
+  // 各項目のバリデーションチェック関数
+  // ==========================================
+  const getUsageDateError = () => (!formData.usage_date ? '利用日を選択してください' : '');
+  const getCategoryError = () => (!formData.category ? '交通手段を選択してください' : '');
+  const getDepartureError = () => (!formData.departure?.trim() ? '出発地を入力してください' : '');
+  const getArrivalError = () => (!formData.arrival?.trim() ? '到着地を入力してください' : '');
+  const getAmountError = () => {
+    if (amountInput === '' || isNaN(Number(amountInput))) return '金額を入力してください';
+    if (Number(amountInput) <= 0) return '1円以上の金額を入力してください';
+    return '';
   };
+
+  // フォーム全体が有効かどうか（ボタン有効化のフラグ）
+  const isValid =
+    !getUsageDateError() &&
+    !getCategoryError() &&
+    !getDepartureError() &&
+    !getArrivalError() &&
+    !getAmountError();
 
   // 適用ボタン処理
   const handleApply = () => {
-    if (!validate()) return;
+    if (!isValid) return;
 
     const finalData: TransportModalData = {
       ...formData,
@@ -137,25 +155,29 @@ export default function TransportRegisterModal({
 
       <DialogContent dividers>
         <Stack spacing={3} sx={{ mt: 1 }}>
+          {/* 利用日 */}
           <TextField
             label="利用日"
             type="date"
             fullWidth
-            slotProps={{ inputLabel: { shrink: true } }} // ✅ 新しい書き方（slotPropsでまとめる）
+            slotProps={{ inputLabel: { shrink: true } }}
             value={formData.usage_date || ''}
             onChange={(e) => handleChange('usage_date', e.target.value)}
-            error={!!errors.usage_date}
-            helperText={errors.usage_date}
+            onBlur={() => handleBlur('usage_date')}
+            error={!!touched.usage_date && !!getUsageDateError()}
+            helperText={touched.usage_date ? getUsageDateError() : ''}
           />
 
+          {/* 交通手段 */}
           <TextField
             select
             label="交通手段"
             fullWidth
             value={formData.category || ''}
             onChange={(e) => handleChange('category', e.target.value)}
-            error={!!errors.category}
-            helperText={errors.category}
+            onBlur={() => handleBlur('category')}
+            error={!!touched.category && !!getCategoryError()}
+            helperText={touched.category ? getCategoryError() : ''}
           >
             <MenuItem value="train">電車</MenuItem>
             <MenuItem value="bus">バス</MenuItem>
@@ -164,6 +186,7 @@ export default function TransportRegisterModal({
             <MenuItem value="other">その他</MenuItem>
           </TextField>
 
+          {/* 片道 / 往復 */}
           <TextField
             select
             label="片道 / 往復"
@@ -175,32 +198,38 @@ export default function TransportRegisterModal({
             <MenuItem value="round_trip">往復</MenuItem>
           </TextField>
 
+          {/* 出発地 */}
           <TextField
             label="出発地"
             fullWidth
             value={formData.departure || ''}
             onChange={(e) => handleChange('departure', e.target.value)}
-            error={!!errors.departure}
-            helperText={errors.departure}
+            onBlur={() => handleBlur('departure')}
+            error={!!touched.departure && !!getDepartureError()}
+            helperText={touched.departure ? getDepartureError() : ''}
           />
 
+          {/* 到着地 */}
           <TextField
             label="到着地"
             fullWidth
             value={formData.arrival || ''}
             onChange={(e) => handleChange('arrival', e.target.value)}
-            error={!!errors.arrival}
-            helperText={errors.arrival}
+            onBlur={() => handleBlur('arrival')}
+            error={!!touched.arrival && !!getArrivalError()}
+            helperText={touched.arrival ? getArrivalError() : ''}
           />
 
+          {/* 金額 */}
           <TextField
             label="金額 (円)"
             fullWidth
             value={amountInput}
             onChange={handleAmountChange}
-            error={!!errors.amount}
-            helperText={errors.amount}
-            slotProps={{ htmlInput: { inputMode: 'numeric', pattern: '[0-9]*' } }} // ✅ inputPropsの新しい書き方
+            onBlur={() => handleBlur('amount')}
+            error={!!touched.amount && !!getAmountError()}
+            helperText={touched.amount ? getAmountError() : ''}
+            slotProps={{ htmlInput: { inputMode: 'numeric', pattern: '[0-9]*' } }}
           />
         </Stack>
       </DialogContent>
@@ -209,6 +238,7 @@ export default function TransportRegisterModal({
         <Button 
           variant="contained" 
           fullWidth 
+          disabled={!isValid}
           onClick={handleApply}
           sx={{ 
             backgroundColor: '#000000', 
@@ -216,7 +246,11 @@ export default function TransportRegisterModal({
             py: 1.5,
             fontWeight: 'bold',
             borderRadius: '8px',
-            '&:hover': { backgroundColor: '#333333' }
+            '&:hover': { backgroundColor: '#333333' },
+            '&.Mui-disabled': {
+              backgroundColor: '#E0E0E0',
+              color: '#A0A0A0',
+            },
           }}
         >
           適用 (Apply)
