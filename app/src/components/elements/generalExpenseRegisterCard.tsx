@@ -8,8 +8,8 @@ import PendingIcon from '@mui/icons-material/Pending';
 import UnpublishedIcon from '@mui/icons-material/Unpublished';
 
 import BaseRegisterCard from './baseRegisterCard';
-// typesから型をインポート
-import { type GeneralExpenseDetail } from '../../features/accounting/types/expenseTypes';
+
+import { type GeneralExpenseDetail, EXPENSE_CATEGORY_LABELS } from '../../features/accounting/types/expenseTypes';
 
 interface GeneralExpenseRegisterCardProps {
   data: GeneralExpenseDetail;
@@ -31,6 +31,8 @@ function GeneralExpenseRegisterCard({ data, actionArea }: GeneralExpenseRegister
     }
   };
 
+  const displayCategory = EXPENSE_CATEGORY_LABELS[data.category] ?? data.category;
+
   return (
     <BaseRegisterCard actionArea={actionArea}>
       <Box sx={{ 
@@ -51,7 +53,7 @@ function GeneralExpenseRegisterCard({ data, actionArea }: GeneralExpenseRegister
           }}>
             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
               <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                {data.category} {/* 消耗品、交際費など */}
+                {displayCategory} {/* 消耗品、交際費など */}
               </Typography>
             </Box>
             
