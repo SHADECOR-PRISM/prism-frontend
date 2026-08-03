@@ -8,8 +8,8 @@ import PendingIcon from '@mui/icons-material/Pending';
 import UnpublishedIcon from '@mui/icons-material/Unpublished';
 
 import BaseRegisterCard from './baseRegisterCard';
-// typesから型をインポート
-import { type TransportDetail } from '../../features/accounting/types/expenseTypes';
+
+import { type TransportDetail, TRANSPORT_CATEGORY_LABELS } from '../../features/accounting/types/expenseTypes';
 
 interface TransportRegisterCardProps {
   data: TransportDetail;
@@ -30,6 +30,8 @@ function TransportRegisterCard({ data, actionArea }: TransportRegisterCardProps)
         return <PendingIcon sx={{ color: 'warning.main', fontSize: 20 }} />;
     }
   };
+
+  const displayCategory = TRANSPORT_CATEGORY_LABELS[data.category] ?? data.category;
   
   return (
     <BaseRegisterCard actionArea={actionArea}>
@@ -52,7 +54,7 @@ function TransportRegisterCard({ data, actionArea }: TransportRegisterCardProps)
           }}>
             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
               <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                {data.category}
+                {displayCategory}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 ({data.is_round_trip ? '往復' : '片道'})

@@ -12,18 +12,58 @@ export interface BaseDetail {
 // 交通費用の型（BaseDetailを拡張）
 // ==========================================
 export interface TransportDetail extends BaseDetail {
-  category: string;       // 電車、バス、タクシー、飛行機など
+  category: TransportCategoryKey;       // 電車、バス、タクシー、飛行機など
   departure: string;      // 出発地
   arrival: string;        // 到着地
   is_round_trip: boolean; // 往復かどうか
   created_at?: string | null;
 }
 
+// 交通費カテゴリのUnion型（Enum値）
+export type TransportCategoryKey =
+  | 'train'
+  | 'bus'
+  | 'taxi'
+  | 'air'
+  | 'other';
+
+// 英語キーから日本語表示名へのマッピング辞書
+export const TRANSPORT_CATEGORY_LABELS: Record<TransportCategoryKey, string> = {
+  train: '電車',
+  bus: 'バス',
+  taxi: 'タクシー',
+  air: '飛行機',
+  other: 'その他',
+};
+
 // ==========================================
 // 経費用の型（BaseDetailを拡張）
 // ==========================================
 export interface GeneralExpenseDetail extends BaseDetail {
-  category: string;       // 消耗品、交際費、会議費など
+  category: ExpenseCategoryKey;       // 消耗品、交際費、会議費など
   description: string;    // 摘要（何を買ったか・目的）
   created_at?: string | null;
 }
+
+// 経費カテゴリのUnion型（Enum値）
+export type ExpenseCategoryKey =
+  | 'system_admin'
+  | 'supplies'
+  | 'software_license'
+  | 'rental'
+  | 'travel_expenses'
+  | 'food_beverage'
+  | 'service_fee'
+  | 'others';
+
+// 英語キーから日本語表示名へのマッピング辞書
+export const EXPENSE_CATEGORY_LABELS: Record<ExpenseCategoryKey, string> = {
+  system_admin: 'システム管理費',
+  supplies: '備品・消耗品費',
+  software_license: 'ライセンス・素材費',
+  rental: 'レンタル費',
+  travel_expenses: '旅費',
+  food_beverage: '飲食・イベント費',
+  service_fee: '手数料',
+  others: 'その他雑費',
+};
