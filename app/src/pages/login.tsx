@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import apiClient, { setAccessToken } from '../api/axiosInstance';
 
@@ -6,14 +5,18 @@ import Typography from '@mui/material/Typography';
 import Box from "@mui/material/Box";
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import Link from '@mui/material/Link'
+import Link from '@mui/material/Link';
 import Modal from '@mui/material/Modal';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import  LoginIcon  from "@mui/icons-material/Login";
+import LoginIcon from "@mui/icons-material/Login";
 import PrismLogo from '../assets/hero.png';
 
-function Login({ onLoginSuccess }) {
+interface LoginProps {
+  onLoginSuccess: (role: 'admin' | 'general') => void;
+}
+
+function Login({ onLoginSuccess }: LoginProps) {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -22,10 +25,9 @@ function Login({ onLoginSuccess }) {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const navigate = useNavigate()
-  
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: React.SubmitEvent) => {
     e.preventDefault();
+    setErrorMessage("");
     
     try {
       const auth_response = await apiClient.post("/login", {
@@ -33,17 +35,20 @@ function Login({ onLoginSuccess }) {
         password: password,
       });
 
-      console.log(auth_response.data)
+      // roleが欠損した場合エラー
+      const role = auth_response.data?.role;
+      if (!role) {
+        throw new Error("Missing role in server response");
+      }
+
       setAccessToken(auth_response.data.access_token);
-
-      onLoginSuccess();
-
-      navigate("/general");
+      onLoginSuccess(role as 'admin' | 'general');
 
     } catch {
+      // 401 403 やレスポンスのrole欠損もすべてここで検知
       setErrorMessage("Incorrect ID or password");
     }
-  }
+  };
 
   return (
     <Box 
@@ -201,7 +206,7 @@ function Login({ onLoginSuccess }) {
         </Box>
       </Modal>
     </Box>
-  )
+  );
 }
 
-export default Login
+export default Login;
