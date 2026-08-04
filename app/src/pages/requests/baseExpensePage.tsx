@@ -1,4 +1,6 @@
 import { useState, useEffect, type ComponentType, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -10,11 +12,16 @@ import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormHelperText from '@mui/material/FormHelperText';
+import CircularProgress from '@mui/material/CircularProgress';
+
 import CardStackLayout from '../../components/layouts/cardStackLayout';
 import { useCards, type BaseDetail } from '../../features/accounting/hooks/useCards';
 import apiClient from '../../api/axiosInstance';
+import { AxiosError } from 'axios'
 
-// プロジェクトの型定義
+import { buildApplicationPayload } from '../../features/accounting/utils/payloadBuilder';
+import { postApplicationRequest } from '../../features/accounting/api/requestsApi';
+
 interface Project {
   id: string;
   name: string;
@@ -22,14 +29,9 @@ interface Project {
   is_active: boolean;
 }
 
-// ==========================================
-// 汎用レイアウトが受け取るPropsの型定義
-// ==========================================
 interface BaseExpenseLayoutProps<T extends BaseDetail> {
   categoryName: string;
-
   CardComponent: ComponentType<{ data: T; actionArea: ReactNode }>;
-
   ModalComponent: ComponentType<{
     open: boolean;
     initialData: Partial<T> | null;
@@ -48,19 +50,17 @@ export default function BaseExpenseLayout<T extends BaseDetail>({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingData, setEditingData] = useState<Partial<T> | null>(null);
 
-  // プロジェクト情報と選択状態のState
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
-  
-  // プルダウンを一度でも触ったかどうかを管理するState
   const [isProjectTouched, setIsProjectTouched] = useState(false);
+  
+  // 送信中のローディング状態
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // プロジェクト情報一覧の取得
   useEffect(() => {
     const fetchProjects = async () => {
       try {
         const response = await apiClient.get<Project[]>('/projects');
-        console.log('取得したプロジェクト一覧:', response.data);
         setProjects(response.data);
       } catch (error) {
         console.error('Failed to fetch projects:', error);
@@ -74,14 +74,9 @@ export default function BaseExpenseLayout<T extends BaseDetail>({
     setIsModalOpen(true);
   };
 
-  const handleEditCard = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    id: string
-  ) => {
+  const handleEditCard = (e: React.MouseEvent<HTMLButtonElement>, id: string) => {
     e.currentTarget.blur();
-
     const targetCard = cards.find((c) => c.id === id);
-
     if (targetCard) {
       setEditingData(targetCard);
       setIsModalOpen(true);
@@ -96,28 +91,45 @@ export default function BaseExpenseLayout<T extends BaseDetail>({
   const handleModalClose = () => {
     setIsModalOpen(false);
   };
-
-  // エラー判定: 「一回開いた/触った」かつ「未選択（値が空）」の場合に true
+  
   const hasProjectError = isProjectTouched && !selectedProjectId;
+  const isSubmitDisabled = !selectedProjectId || cards.length === 0 || isSubmitting;
 
-  // ボタン無効化フラグ
-  const isSubmitDisabled = !selectedProjectId || cards.length === 0;
+  // ナビゲート定義
+  const navigate = useNavigate();
 
-  const handleSubmit = () => {
+  // データ送信（submitボタン処理）
+  const handleSubmit = async () => {
     if (isSubmitDisabled) return;
 
-    const payload = {
-      header: {
-        project_id: selectedProjectId,
-        type: categoryName,
-      },
-      details: cards.map((c) => ({
-        ...c,
-        id: null,
-      })),
-    };
+    setIsSubmitting(true);
 
-    console.log(`${categoryName}の新規登録リクエスト送信:`, payload);
+    try {
+      // ペイロード整形して保存
+      const payload = buildApplicationPayload(categoryName, selectedProjectId, cards);
+      const res = await postApplicationRequest(payload);
+
+      console.log('登録成功:', res);
+
+      // 申請トップへ遷移
+      navigate('/general/application');
+
+    } catch (error: unknown) { 
+      console.error('送信エラー:', error);
+
+      let errorDetail = '通信エラーが発生しました';
+
+      // AxiosError かどうか判定して safely にプロパティを取得
+      if (error instanceof AxiosError && error.response?.data?.detail) {
+        errorDetail = error.response.data.detail;
+      } else if (error instanceof Error) {
+        errorDetail = error.message;
+      }
+
+      alert(`申請の送信に失敗しました:\n${errorDetail}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -140,18 +152,10 @@ export default function BaseExpenseLayout<T extends BaseDetail>({
           borderBottom: '1px solid #E0E0E0',
         }}
       >
-        <Typography
-          variant="h5"
-          sx={{
-            color: '#000000',
-            fontWeight: 'bold',
-            mb: 1.5,
-          }}
-        >
+        <Typography variant="h5" sx={{ color: '#000000', fontWeight: 'bold', mb: 1.5 }}>
           {categoryName}
         </Typography>
 
-        {/* error プロパティで赤枠表示を制御 */}
         <FormControl fullWidth size="small" error={hasProjectError}>
           <InputLabel id="project-select-label">プロジェクトを選択</InputLabel>
           <Select
@@ -162,8 +166,8 @@ export default function BaseExpenseLayout<T extends BaseDetail>({
               setSelectedProjectId(e.target.value);
               setIsProjectTouched(true);
             }}
-            onClose={() => setIsProjectTouched(true)} // プルダウンを閉じたタイミングで判定
-            onBlur={() => setIsProjectTouched(true)}  // フォーカスが外れたタイミングで判定
+            onClose={() => setIsProjectTouched(true)}
+            onBlur={() => setIsProjectTouched(true)}
           >
             {projects.map((project) => (
               <MenuItem key={project.id} value={project.id}>
@@ -171,8 +175,6 @@ export default function BaseExpenseLayout<T extends BaseDetail>({
               </MenuItem>
             ))}
           </Select>
-          
-          {/* エラー時に赤文字メッセージを表示 */}
           {hasProjectError && (
             <FormHelperText>プロジェクトの選択は必須です</FormHelperText>
           )}
@@ -180,34 +182,21 @@ export default function BaseExpenseLayout<T extends BaseDetail>({
       </Box>
 
       {/* 2. カードスタック領域（中央） */}
-      <Box
-        sx={{
-          flex: 1,
-          minHeight: 0,
-          overflow: 'hidden',
-        }}
-      >
+      <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
         <CardStackLayout addCardHandler={handleAddCard}>
           {cards.map((card) => (
             <CardComponent
               key={card.id}
               data={card}
               actionArea={
-                <Box
-                  sx={{
-                    display: 'flex',
-                    gap: 1,
-                  }}
-                >
+                <Box sx={{ display: 'flex', gap: 1 }}>
                   <IconButton
                     onClick={() => deleteCard(card.id)}
                     sx={{
                       backgroundColor: '#FF7F7F',
                       color: '#FFFFFF',
                       borderRadius: '8px',
-                      '&:hover': {
-                        backgroundColor: '#e57272',
-                      },
+                      '&:hover': { backgroundColor: '#e57272' },
                     }}
                   >
                     <DeleteIcon />
@@ -222,9 +211,7 @@ export default function BaseExpenseLayout<T extends BaseDetail>({
                       borderRadius: '8px',
                       textTransform: 'none',
                       padding: '6px 16px',
-                      '&:hover': {
-                        backgroundColor: '#333333',
-                      },
+                      '&:hover': { backgroundColor: '#333333' },
                     }}
                   >
                     Edit
@@ -261,16 +248,15 @@ export default function BaseExpenseLayout<T extends BaseDetail>({
             height: '52px',
             fontSize: '16px',
             fontWeight: 'bold',
-            '&:hover': {
-              backgroundColor: '#333333',
-            },
-            '&.Mui-disabled': {
-              backgroundColor: '#E0E0E0',
-              color: '#A0A0A0',
-            },
+            '&:hover': { backgroundColor: '#333333' },
+            '&.Mui-disabled': { backgroundColor: '#E0E0E0', color: '#A0A0A0' },
           }}
         >
-          申請を送信 (Submit)
+          {isSubmitting ? (
+            <CircularProgress size={24} sx={{ color: '#FFFFFF' }} />
+          ) : (
+            '申請を送信 (Submit)'
+          )}
         </Button>
       </Box>
 
