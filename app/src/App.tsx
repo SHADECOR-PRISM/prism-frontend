@@ -7,11 +7,11 @@ import HomeWithoutFooter from './components/layouts/generalHomeWithoutFooter.tsx
 import AdminHomeWithFooter from './components/layouts/adminHomeWithFooter.tsx'
 import AdminHomeWithoutFooter from './components/layouts/adminHomeWithoutFooter.tsx'
 
-import GeneralLog from './pages/requests/log.tsx'
-import GeneralApplication from './pages/requests/application.tsx'
-import GeneralSetting from './pages/requests/setting.tsx'
-import GeneralExpensePage from './pages/requests/generalExpensePage.tsx'
-import TransportExpensePage from './pages/requests/transportExpensePage.tsx'
+import GeneralLog from './pages/general/log.tsx'
+import GeneralApplication from './pages/general/application.tsx'
+import GeneralSetting from './pages/general/setting.tsx'
+import GeneralExpensePage from './pages/general/generalExpensePage.tsx'
+import TransportExpensePage from './pages/general/transportExpensePage.tsx'
 import apiClient, {setAccessToken} from './api/axiosInstance.tsx'
 import './App.css'
 

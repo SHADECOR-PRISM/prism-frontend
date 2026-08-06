@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import dayjs, { Dayjs } from 'dayjs'
-import apiClient from '../../api/axiosInstance'
+import apiClient from '../../api/axiosInstance.tsx'
 import Container from '@mui/material/Container'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
