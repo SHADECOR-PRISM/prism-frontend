@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import apiClient from '../../api/axiosInstance';
+import apiClient from '../../../api/axiosInstance';
 
 import Typography from '@mui/material/Typography';
 import Box from "@mui/material/Box";

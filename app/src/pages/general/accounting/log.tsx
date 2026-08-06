@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
 import dayjs, { Dayjs } from 'dayjs'
-import apiClient from '../../api/axiosInstance.tsx'
+import apiClient from '../../../api/axiosInstance.tsx'
 import Container from '@mui/material/Container'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
-import DateRangeSelector from '../../components/elements/dateRangeSelector.tsx'
-import LogContainer from '../../components/elements/logContainer.tsx'
+import DateRangeSelector from '../../../components/elements/dateRangeSelector.tsx'
+import LogContainer from '../../../components/elements/logContainer.tsx'
 
 function GeneralLog() {
   const [dateRange, setDateRange] = useState({
