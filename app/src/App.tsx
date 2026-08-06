@@ -1,8 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { useState, useEffect } from 'react'
 import Login from './pages/login.tsx'
-import HomeWithFooter from './components/layouts/homeWithFooter.tsx'
-import HomeWithoutFooter from './components/layouts/homeWithoutFooter.tsx'
+
+import HomeWithFooter from './components/layouts/generalHomeWithFooter.tsx'
+import HomeWithoutFooter from './components/layouts/generalHomeWithoutFooter.tsx'
+import AdminHomeWithFooter from './components/layouts/adminHomeWithFooter.tsx'
+import AdminHomeWithoutFooter from './components/layouts/adminHomeWithoutFooter.tsx'
+
 import GeneralLog from './pages/requests/log.tsx'
 import GeneralApplication from './pages/requests/application.tsx'
 import GeneralSetting from './pages/requests/setting.tsx'
@@ -46,7 +50,7 @@ function App() {
   }
 
   // 権限ごとのデフォルトトップ画面
-  const defaultTarget = userRole === 'admin' ? '/admin/log' : '/general/log';
+  const defaultTarget = userRole === 'admin' ? '/admin/approval' : '/general/log';
   
   // ガード条件判定関数
   const isGeneral = isAuthenticated && userRole === 'general';
@@ -74,17 +78,12 @@ function App() {
           )
         } />
 
-        {/* 一般ユーザーページへの直接的なアクセス */}
+        {/*. =========   一般ユーザーページへの直接的なアクセス.  ============ */}
         <Route path="/general" element={
           isGeneral ? <Navigate to="/general/log" replace /> : <Navigate to={defaultTarget} replace />
         } />
 
-        {/* 管理者ユーザーページへの直接的なアクセス */}
-        <Route path="/admin" element={
-          isAdmin ? <Navigate to="/admin/log" replace /> : <Navigate to={defaultTarget} replace />
-        } />
-
-        {/* ホーム画面へのアクセス */}
+        {/* 一般ユーザ画面へのアクセス */}
         <Route element={<HomeWithFooter />}>
           
           {/* 一般ユーザー申請履歴ページへのアクセス（general 専用） */}
@@ -101,15 +100,8 @@ function App() {
           <Route path="/general/setting" element={
             isGeneral ? <GeneralSetting /> : (isAuthenticated ? <Navigate to={defaultTarget} replace /> : <Navigate to="/login" replace />)
           } />
-
-          {/* 💡 追加: 管理者ユーザー申請履歴ページへのアクセス（admin 専用） */}
-          <Route path="/admin/log" element={
-            isAdmin ? <GeneralLog /> : (isAuthenticated ? <Navigate to={defaultTarget} replace /> : <Navigate to="/login" replace />)
-          } />
-
         </Route>
-
-
+        
 
         {/* フッター無しレイアウトへのアクセス */}
         <Route element={<HomeWithoutFooter />}>
@@ -125,14 +117,37 @@ function App() {
           } />
 
         </Route>
-        
+
+
+        {/* ============= 管理者ユーザーページへの直接的なアクセス =================== */}
+
+        <Route path="/admin" element={
+          isAdmin ? <Navigate to="/admin/approval" replace /> : <Navigate to={defaultTarget} replace />
+        } />
+
+        {/* 管理者アカウント画面へのアクセス */}
+        <Route element={<AdminHomeWithFooter />}>
+
+          {/* 管理者ユーザー承認ページへのアクセス（admin 専用） */}
+          <Route path="/admin/approval" element={
+            isAdmin ? <GeneralLog /> : (isAuthenticated ? <Navigate to={defaultTarget} replace /> : <Navigate to="/login" replace />)
+          } />
+
+        </Route>
+
+        {/* フッター無しレイアウトへのアクセス */}
+        <Route element={<AdminHomeWithoutFooter />}>
+
+
+        </Route>
+
+
 
         {/* 機能ページへの直接的なアクセス */}
         {/* 今後機能を追加する場合はここにルータを追加する */}
-        <Route path="/hello" element={
-          isGeneral ? <GeneralExpensePage /> : (isAuthenticated ? <Navigate to={defaultTarget} replace /> : <Navigate to="/login" replace />)
-        } />
+
         
+
         {/* どこにも当てはまらない場合 */}
         <Route path="*" element={
           <Navigate to="/" replace />
