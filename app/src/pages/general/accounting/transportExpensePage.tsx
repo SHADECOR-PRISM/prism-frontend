@@ -1,6 +1,6 @@
 import BaseExpenseLayout from './baseExpensePage'; 
-import TransportRegisterCard from '../../../components/elements/transportRegisterCard';
-import TransportRegisterModal from '../../../components/elements/transportRegisterModal';
+import TransportRegisterCard from '../../../features/accounting/components/cards/transportRegisterCard';
+import TransportRegisterModal from '../../../features/accounting/components/cards/transportRegisterModal';
 import { type TransportDetail } from '../../../features/accounting/types/expenseTypes'; // 型をインポート
 
 export default function TransportExpensePage() {

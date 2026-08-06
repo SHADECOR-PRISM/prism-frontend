@@ -2,8 +2,8 @@ import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
-import StatusIcon from './statusIcon.tsx'
-import CategoryIcon from './categoryIcon.tsx'
+import StatusIcon from '../../../../components/elements/statusIcon.tsx'
+import CategoryIcon from '../../../../components/elements/categoryIcon.tsx'
 
 function LogContainer({logData}) {
   
