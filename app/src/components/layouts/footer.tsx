@@ -1,11 +1,18 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import BottomNavigation from '@mui/material/BottomNavigation'
 import BottomNavigationAction from '@mui/material/BottomNavigationAction'
-import LogIcon from '@mui/icons-material/ViewList'
-import ApplicationIcon from '@mui/icons-material/EditDocument'
-import SettingIcon from '@mui/icons-material/Settings'
 
-function Footer() {
+// 呼び出し側のレイアウトから渡す各メニュー項目の型定義
+export interface NavItem {
+  value: string;         // 遷移先パス (例: "/general/log")
+  icon: React.ReactNode; // MUIアイコンコンポーネント
+}
+
+interface FooterProps {
+  items: NavItem[];
+}
+
+function Footer({ items }: FooterProps) {
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -24,20 +31,13 @@ function Footer() {
         borderTop: '1px solid #E0E0E0',
       }}
     >
-      <BottomNavigationAction
-        icon={<LogIcon />}
-        value="/general/log"
-      />
-
-      <BottomNavigationAction
-        icon={<ApplicationIcon />}
-        value="/general/application"
-      />
-
-      <BottomNavigationAction
-        icon={<SettingIcon />}
-        value="/general/setting"
-      />
+      {items.map((item) => (
+        <BottomNavigationAction
+          key={item.value}
+          icon={item.icon}
+          value={item.value}
+        />
+      ))}
     </BottomNavigation>
   )
 }
