@@ -1,21 +1,18 @@
+import { useState } from 'react'
 import Box from '@mui/material/Box'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker'
 import type { Dayjs } from 'dayjs'
 
-// 日付範囲のデータ型
 export interface DateRange {
   fromDate: Dayjs | null;
   toDate: Dayjs | null;
 }
 
-// コンポーネントの Props 型定義
 interface DateRangeSelectorProps {
   dateRange: DateRange;
-  // 日付が変更されたタイミングで最新の { fromDate, toDate } を親に渡す
   onChange: (newRange: DateRange) => void;
-  // オプション: 画面に応じて横幅を調整可能（デフォルトは全幅）
   width?: string | number;
 }
 
@@ -24,22 +21,41 @@ function DateRangeSelector({
   onChange,
   width = '100%',
 }: DateRangeSelectorProps) {
-  // 開始日が終了日より後になっているかのエラー判定（Nullチェック含む）
-  const isError =
-    !!dateRange.fromDate &&
-    !!dateRange.toDate &&
-    dateRange.fromDate.isAfter(dateRange.toDate);
+  // ピッカー表示用のローカルステート
+  const [tempFromDate, setTempFromDate] = useState<Dayjs | null>(dateRange.fromDate);
+  const [tempToDate, setTempToDate] = useState<Dayjs | null>(dateRange.toDate);
 
-  const handleFromDateChange = (newFromDate: Dayjs | null) => {
+  // 親から渡された Props の前回値を保持して比較
+  const [prevDateRange, setPrevDateRange] = useState<DateRange>(dateRange);
+
+  // 💡 useEffect を使わず、レンダーフェーズで Props の変化を同期する
+  if (
+    dateRange.fromDate !== prevDateRange.fromDate ||
+    dateRange.toDate !== prevDateRange.toDate
+  ) {
+    setPrevDateRange(dateRange);
+    setTempFromDate(dateRange.fromDate);
+    setTempToDate(dateRange.toDate);
+  }
+
+  const isError =
+    !!tempFromDate &&
+    !!tempToDate &&
+    tempFromDate.isAfter(tempToDate);
+
+  // OKボタンが押されたとき (onAccept) にのみ親の onChange を呼ぶ
+  const handleFromDateAccept = (newFromDate: Dayjs | null) => {
+    setTempFromDate(newFromDate);
     onChange({
       fromDate: newFromDate,
-      toDate: dateRange.toDate,
+      toDate: tempToDate,
     });
   };
 
-  const handleToDateChange = (newToDate: Dayjs | null) => {
+  const handleToDateAccept = (newToDate: Dayjs | null) => {
+    setTempToDate(newToDate);
     onChange({
-      fromDate: dateRange.fromDate,
+      fromDate: tempFromDate,
       toDate: newToDate,
     });
   };
@@ -57,8 +73,9 @@ function DateRangeSelector({
         <MobileDatePicker
           label="開始日"
           format="YYYY/MM/DD"
-          value={dateRange.fromDate}
-          onChange={handleFromDateChange}
+          value={tempFromDate}
+          onChange={(newValue) => setTempFromDate(newValue)}
+          onAccept={handleFromDateAccept}
           slotProps={{
             textField: {
               size: 'small',
@@ -76,8 +93,9 @@ function DateRangeSelector({
         <MobileDatePicker
           label="終了日"
           format="YYYY/MM/DD"
-          value={dateRange.toDate}
-          onChange={handleToDateChange}
+          value={tempToDate}
+          onChange={(newValue) => setTempToDate(newValue)}
+          onAccept={handleToDateAccept}
           slotProps={{
             textField: {
               size: 'small',

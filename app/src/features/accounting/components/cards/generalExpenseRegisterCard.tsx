@@ -68,12 +68,12 @@ function GeneralExpenseRegisterCard({ data, actionArea }: GeneralExpenseRegister
             sx={{ 
               fontWeight: 500,
               display: '-webkit-box',
-              WebkitLineClamp: 1, // 摘要が長すぎる場合は1行で省略（...）する
+              WebkitLineClamp: 1, 
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden'
             }}
           >
-            {data.description} {/* 摘要（何を買ったか）を表示 */}
+            {data.description} 
           </Typography>
 
           <Typography variant="caption" sx={{ color: 'text.primary' }}>

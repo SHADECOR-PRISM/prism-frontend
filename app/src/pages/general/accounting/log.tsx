@@ -1,22 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import dayjs from 'dayjs'
 import apiClient from '../../../api/axiosInstance.tsx'
-import Container from '@mui/material/Container'
 import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
 import DateRangeSelector, { type DateRange } from '../../../components/elements/dateRangeSelector.tsx'
-import LogContainer from '../../../features/accounting/components/container/logContainer.tsx'
-
-export interface LogItem {
-  id: string | number;
-  status: string;
-  project_name: string;
-  applied_at: string;
-  category: string;
-  total_amount: number;
-  user_id: string;
-}
+import LogContainer, { type LogItem } from '../../../features/accounting/components/container/logContainer.tsx'
 
 function GeneralLog() {
   const [dateRange, setDateRange] = useState<DateRange>({
@@ -25,18 +15,17 @@ function GeneralLog() {
   });
   
   const [logs, setLogs] = useState<LogItem[]>([]);
-  const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const loaderRef = useRef<HTMLDivElement | null>(null);
 
-  // 日付範囲の妥当性チェック
+  const loaderRef = useRef<HTMLDivElement | null>(null);
+  const isFetchingRef = useRef(false);
+
   const isValidRange =
     !!dateRange.fromDate &&
     !!dateRange.toDate &&
     !dateRange.fromDate.isAfter(dateRange.toDate);
 
-  // 日付変更時のハンドラーで直接ステートをリセット＆更新
   const handleDateChange = (newRange: DateRange) => {
     const valid =
       !!newRange.fromDate &&
@@ -45,42 +34,48 @@ function GeneralLog() {
 
     setDateRange(newRange);
     setLogs([]);
-    setOffset(0);
-    setLoading(false);
     setHasMore(valid);
+    isFetchingRef.current = false;
   };
 
-  // データ取得関数
   const loadLogs = useCallback(async () => {
-    if (loading || !hasMore || !isValidRange || !dateRange.fromDate || !dateRange.toDate) return;
+    if (isFetchingRef.current || !hasMore || !isValidRange || !dateRange.fromDate || !dateRange.toDate) return;
 
+    isFetchingRef.current = true;
     setLoading(true);
 
     const start = dateRange.fromDate.startOf('day').toISOString();
     const end = dateRange.toDate.add(1, 'day').startOf('day').toISOString();
 
     try {
-      const response = await apiClient.get<LogItem[]>(`/container/me?start=${start}&end=${end}&offset=${offset}`);
+      const currentOffset = logs.length;
+      const response = await apiClient.get<LogItem[]>(
+        `/container/me?start=${start}&end=${end}&offset=${currentOffset}`
+      );
 
-      if (response.data.length === 0) {
+      if (!response.data || response.data.length === 0) {
         setHasMore(false);
       } else {
-        setLogs((prev) => [...prev, ...response.data]);
-        setOffset((prev) => prev + response.data.length);
+        setLogs((prev) => {
+          const existingIds = new Set(prev.map((item) => item.id));
+          const uniqueNewItems = response.data.filter((item) => !existingIds.has(item.id));
+          return [...prev, ...uniqueNewItems];
+        });
       }
-    } catch {
+    } catch (error) {
+      console.error('ログ取得エラー:', error);
       setHasMore(false);
     } finally {
       setLoading(false);
+      isFetchingRef.current = false;
     }
-  }, [loading, hasMore, isValidRange, dateRange, offset]);
+  }, [hasMore, isValidRange, dateRange, logs.length]);
 
-  // スクロール監視 (IntersectionObserver)
   useEffect(() => {
     if (!hasMore || !isValidRange) return;
 
     const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !loading) {
+      if (entries[0].isIntersecting && !isFetchingRef.current) {
         loadLogs();
       }
     });
@@ -96,27 +91,58 @@ function GeneralLog() {
       }
       observer.disconnect();
     };
-  }, [hasMore, isValidRange, loading, loadLogs]);
+  }, [hasMore, isValidRange, loadLogs]);
 
   return (
-    <>
-      <Container sx={{ position: 'sticky', top: '60px', zIndex: 10, py: '20px', display: 'flex', bgcolor: 'white' }}>
-        <Box sx={{ flexGrow: 1 }} />
-        <DateRangeSelector dateRange={dateRange} onChange={handleDateChange} />
-      </Container>
-      <Container sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        {logs.map((item) => (
-          <LogContainer key={item.id} logData={item} />
-        ))}
-        {hasMore && <Box ref={loaderRef} sx={{ height: '20px', width: '100%' }} />}
-        {!hasMore && logs.length === 0 && (
-          <Typography sx={{ fontSize: '16px', color: 'grey', my: 4 }}>
-            {!isValidRange ? '正しい日付範囲を指定してください' : 'No items'}
-          </Typography>
-        )}
-        {loading && <CircularProgress size="30px" color="inherit" aria-label="Loading…" sx={{ my: 2 }} />}
-      </Container>
-    </>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        width: '100%',
+        overflow: 'hidden',
+        backgroundColor: '#F9F9F9',
+      }}
+    >
+      {/* 1. 日付選択エリア（上部固定） */}
+      <Box
+        sx={{
+          p: 2,
+          flexShrink: 0,
+          backgroundColor: '#FFFFFF',
+          borderBottom: '1px solid #E0E0E0',
+          display: 'flex',
+          justifyContent: 'flex-end',
+        }}
+      >
+        <Container maxWidth="md" disableGutters sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <DateRangeSelector dateRange={dateRange} onChange={handleDateChange} />
+        </Container>
+      </Box>
+
+      {/* 2. ログリスト領域（中央スクロールエリア） */}
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto', bgcolor: '#FFFFFF', px: 2, py: 1 }}>
+        <Container maxWidth="md" disableGutters sx={{ display: 'flex', flexDirection: 'column' }}>
+          {logs.map((item, index) => (
+            <LogContainer key={item.id ? `${item.id}-${index}` : index} data={item} />
+          ))}
+
+          {hasMore && <Box ref={loaderRef} sx={{ height: '20px', width: '100%' }} />}
+        
+          {!hasMore && logs.length === 0 && (
+            <Typography sx={{ fontSize: '14px', color: 'grey', my: 4, textAlign: 'center' }}>
+              {!isValidRange ? '正しい日付範囲を指定してください' : 'No items'}
+            </Typography>
+          )}
+
+          {loading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+              <CircularProgress size="24px" color="inherit" />
+            </Box>
+          )}
+        </Container>
+      </Box>
+    </Box>
   );
 }
 
