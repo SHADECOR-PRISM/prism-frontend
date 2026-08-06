@@ -7,7 +7,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
 import UnpublishedIcon from '@mui/icons-material/Unpublished';
 
-import BaseRegisterCard from '../../../../components/elements/baseRegisterCard';
+import BaseRegisterCard from './baseRegisterCard';
 
 import { type TransportDetail, TRANSPORT_CATEGORY_LABELS } from '../../types/expenseTypes';
 
