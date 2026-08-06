@@ -9,7 +9,7 @@ import UnpublishedIcon from '@mui/icons-material/Unpublished';
 
 import BaseRegisterCard from './baseRegisterCard';
 
-import { type GeneralExpenseDetail, EXPENSE_CATEGORY_LABELS } from '../../features/accounting/types/expenseTypes';
+import { type GeneralExpenseDetail, EXPENSE_CATEGORY_LABELS } from '../../types/expenseTypes';
 
 interface GeneralExpenseRegisterCardProps {
   data: GeneralExpenseDetail;

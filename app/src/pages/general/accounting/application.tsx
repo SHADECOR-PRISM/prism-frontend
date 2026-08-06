@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import DynamicGridLayout from '../../components/layouts/dynamicGridLayout'; 
+import DynamicGridLayout from '../../../components/layouts/dynamicGridLayout'; 
 
 function GeneralApplication() {
   const navigate = useNavigate();
