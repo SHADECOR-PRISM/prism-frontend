@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import apiClient from '../../../api/axiosInstance.tsx'
 import Box from '@mui/material/Box'
@@ -9,6 +10,8 @@ import DateRangeSelector, { type DateRange } from '../../../components/elements/
 import LogContainer, { type LogItem } from '../../../features/accounting/components/container/logContainer.tsx'
 
 function GeneralLog() {
+  const navigate = useNavigate();
+
   const [dateRange, setDateRange] = useState<DateRange>({
     fromDate: dayjs().subtract(3, 'month'),
     toDate: dayjs(),
@@ -25,6 +28,14 @@ function GeneralLog() {
     !!dateRange.fromDate &&
     !!dateRange.toDate &&
     !dateRange.fromDate.isAfter(dateRange.toDate);
+
+  // コンテナクリック時に呼び出される遷移ハンドラー（外切り出し）
+  // 今後 item.id (UUID) を組み込む際も、この関数内のパスを変更・拡張するだけで対応可能です。
+  const handleContainerClick = (containerId?: string | number) => {
+    // 一旦仮置きのパスを指定（例: dummy-container-uuid）
+    const targetId = containerId ?? 'dummy-container-uuid';
+    navigate(`/general/log/${targetId}`);
+  };
 
   const handleDateChange = (newRange: DateRange) => {
     const valid =
@@ -124,7 +135,11 @@ function GeneralLog() {
       <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto', bgcolor: '#FFFFFF', px: 2, py: 1 }}>
         <Container maxWidth="md" disableGutters sx={{ display: 'flex', flexDirection: 'column' }}>
           {logs.map((item, index) => (
-            <LogContainer key={item.id ? `${item.id}-${index}` : index} data={item} />
+            <LogContainer
+              key={item.id ? `${item.id}-${index}` : index}
+              data={item}
+              onClick={() => handleContainerClick(item.id)}
+            />
           ))}
 
           {hasMore && <Box ref={loaderRef} sx={{ height: '20px', width: '100%' }} />}
