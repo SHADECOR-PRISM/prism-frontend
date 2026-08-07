@@ -2,7 +2,7 @@ import Box from '@mui/material/Box'
 import { Outlet } from 'react-router-dom'
 import Header from './header'
 
-function AdminHomeWithFooter() {
+export default function HeaderOnlyLayout() {
   return (
     <Box
       sx={{
@@ -25,9 +25,6 @@ function AdminHomeWithFooter() {
       >
         <Outlet />
       </Box>
-
     </Box>
   )
 }
-
-export default AdminHomeWithFooter
