@@ -82,8 +82,7 @@ export const buildApplicationPayload = (
       id: null, // 新規登録のため null
       usage_date: c.usage_date || '',
       category: c.category,
-      // 既存型の description をバックエンドが要求する remark にマッピング
-      remark: c.description || null, 
+      remark: c.remark || null, 
       amount: Number(c.amount),
     })),
   };

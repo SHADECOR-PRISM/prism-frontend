@@ -1,13 +1,13 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import dayjs from 'dayjs'
-import apiClient from '../../../api/axiosInstance.tsx'
-import Box from '@mui/material/Box'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
-import CircularProgress from '@mui/material/CircularProgress'
-import DateRangeSelector, { type DateRange } from '../../../components/elements/dateRangeSelector.tsx'
-import LogContainer, { type LogItem } from '../../../features/accounting/components/container/logContainer.tsx'
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs';
+import apiClient from '../../../api/axiosInstance.tsx';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
+import DateRangeSelector, { type DateRange } from '../../../components/elements/dateRangeSelector.tsx';
+import LogContainer, { type LogItem } from '../../../features/accounting/components/container/logContainer.tsx';
 
 function GeneralLog() {
   const navigate = useNavigate();
@@ -29,12 +29,14 @@ function GeneralLog() {
     !!dateRange.toDate &&
     !dateRange.fromDate.isAfter(dateRange.toDate);
 
-  // コンテナクリック時に呼び出される遷移ハンドラー（外切り出し）
-  // 今後 item.id (UUID) を組み込む際も、この関数内のパスを変更・拡張するだけで対応可能です。
-  const handleContainerClick = (containerId?: string | number) => {
-    // 一旦仮置きのパスを指定（例: dummy-container-uuid）
-    const targetId = containerId ?? 'dummy-container-uuid';
-    navigate(`/general/log/${targetId}`);
+  // ★ 修正箇所: LogItem 全体を受け取り、state 経由で遷移先へ渡す
+  const handleContainerClick = (item: LogItem) => {
+    const targetId = item.id ?? 'dummy-container-uuid';
+    navigate(`/general/log/${targetId}`, {
+      state: {
+        containerData: item, // 詳細画面へデータを渡す
+      },
+    });
   };
 
   const handleDateChange = (newRange: DateRange) => {
@@ -138,7 +140,7 @@ function GeneralLog() {
             <LogContainer
               key={item.id ? `${item.id}-${index}` : index}
               data={item}
-              onClick={() => handleContainerClick(item.id)}
+              onClick={() => handleContainerClick(item)} // ★ 修正箇所: item オブジェクトを渡す
             />
           ))}
 
