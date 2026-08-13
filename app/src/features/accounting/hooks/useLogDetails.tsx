@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import apiClient from '../../../api/axiosInstance';
 import { updateApplicationRequest } from '../api/requestsApi';
-import { canEditCard, isTempId, isAllCardsDeleted } from '../utils/expensePolicy';
+import { canEditCard, isTempId } from '../utils/expensePolicy';
+import { buildUpdateApplicationPayload } from '../utils/payloadBuilder'; // ★ 追加
 import type { ContainerDetailData, BaseDetail } from '../types/expenseTypes';
 
 export function useLogDetails<T extends BaseDetail>(containerId: string | undefined) {
@@ -128,23 +129,23 @@ export function useLogDetails<T extends BaseDetail>(containerId: string | undefi
 
   // 6. Submit 処理（変更の保存 / コンテナ全削除）
   const submitChanges = useCallback(async () => {
-    if (!containerId || !isDirty) return { success: false };
+    if (!containerId || !isDirty || !containerData) return { success: false };
 
     setIsSubmitting(true);
 
     try {
-      const isAllDeleted = isAllCardsDeleted(cards.length);
-
-      const payload = {
+      // payloadBuilder を使用して送信データを整形
+      const payload = buildUpdateApplicationPayload(
         containerId,
-        updatedDetails: cards,
-        deletedDetailIds,
-        isAllDeleted,
-      };
+        containerData.category,
+        cards,
+        deletedDetailIds
+      );
 
+      // API（モック）へ送信
       const response = await updateApplicationRequest(payload);
 
-      return { success: response.success, isAllDeleted };
+      return { success: response.success, isAllDeleted: payload.is_all_deleted };
     } catch (err) {
       console.error('送信エラー:', err);
       alert('変更の保存に失敗しました。');
@@ -152,7 +153,7 @@ export function useLogDetails<T extends BaseDetail>(containerId: string | undefi
     } finally {
       setIsSubmitting(false);
     }
-  }, [containerId, isDirty, cards, deletedDetailIds]);
+  }, [containerId, isDirty, containerData, cards, deletedDetailIds]);
 
   return {
     containerData,
