@@ -82,9 +82,80 @@ export const buildApplicationPayload = (
       id: null, // 新規登録のため null
       usage_date: c.usage_date || '',
       category: c.category,
-      // 既存型の description をバックエンドが要求する remark にマッピング
-      remark: c.description || null, 
+      remark: c.remark || null, 
       amount: Number(c.amount),
     })),
+  };
+};
+
+// ==========================================
+// 更新APIリクエスト（送信用ペイロード）の型定義
+// ==========================================
+export interface UpdateDetailPayload {
+  id: string | null; // 既存カードはUUID、新規追加分（temp_始まり）は null
+  usage_date: string;
+  category: string;
+  departure?: string | null;
+  arrival?: string | null;
+  is_round_trip?: boolean;
+  remark?: string | null;
+  amount: number;
+}
+
+export interface UpdateApplicationPayload {
+  container_id: string;
+  updated_details: UpdateDetailPayload[];
+  deleted_detail_ids: string[];
+  is_all_deleted: boolean;
+}
+
+// ==========================================
+// 更新用ペイロード変換関数
+// ==========================================
+/**
+ * LogDetailPage の状態から更新用 API ペイロードを構築する
+ */
+export const buildUpdateApplicationPayload = (
+  containerId: string,
+  categoryName: string, // "交通費" または "経費"
+  cards: BaseDetail[],
+  deletedDetailIds: string[]
+): UpdateApplicationPayload => {
+  const isTransport = categoryName === '交通費';
+  const isAllDeleted = cards.length === 0;
+
+  const updatedDetails: UpdateDetailPayload[] = cards.map((card) => {
+    // 一時ID (temp_ 始まり) の場合は新規追加分なので id を null に変換
+    const isTemp = card.id.startsWith('temp_');
+    const targetId = isTemp ? null : card.id;
+
+    if (isTransport) {
+      const c = card as TransportDetail;
+      return {
+        id: targetId,
+        usage_date: c.usage_date || '',
+        category: c.category,
+        departure: c.departure || null,
+        arrival: c.arrival || null,
+        is_round_trip: c.is_round_trip ?? true,
+        amount: Number(c.amount),
+      };
+    } else {
+      const c = card as GeneralExpenseDetail;
+      return {
+        id: targetId,
+        usage_date: c.usage_date || '',
+        category: c.category,
+        remark: c.remark || null,
+        amount: Number(c.amount),
+      };
+    }
+  });
+
+  return {
+    container_id: containerId,
+    updated_details: updatedDetails,
+    deleted_detail_ids: deletedDetailIds,
+    is_all_deleted: isAllDeleted,
   };
 };

@@ -1,8 +1,7 @@
 import Box from '@mui/material/Box'
 import { Outlet } from 'react-router-dom'
-import Header from './header'
 
-function HomeWithoutFooter() {
+export default function BlankLayout() {
   return (
     <Box
       sx={{
@@ -11,8 +10,6 @@ function HomeWithoutFooter() {
         height: '100dvh',
       }}
     >
-      <Header />
-
       <Box
         component="main"
         sx={{
@@ -25,9 +22,6 @@ function HomeWithoutFooter() {
       >
         <Outlet />
       </Box>
-
     </Box>
   )
 }
-
-export default HomeWithoutFooter

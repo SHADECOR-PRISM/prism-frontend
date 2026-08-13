@@ -1,91 +1,166 @@
-import { useState, useRef, useEffect } from 'react'
-import dayjs, { Dayjs } from 'dayjs'
-import apiClient from '../../../api/axiosInstance.tsx'
-import Container from '@mui/material/Container'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import CircularProgress from '@mui/material/CircularProgress'
-import DateRangeSelector from '../../../components/elements/dateRangeSelector.tsx'
-import LogContainer from '../../../features/accounting/components/container/logContainer.tsx'
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs';
+import apiClient from '../../../api/axiosInstance.tsx';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
+import DateRangeSelector, { type DateRange } from '../../../components/elements/dateRangeSelector.tsx';
+import LogContainer, { type LogItem } from '../../../features/accounting/components/container/logContainer.tsx';
 
 function GeneralLog() {
-  const [dateRange, setDateRange] = useState({
-    fromDate: dayjs().subtract(3, "month"),
-    toDate: dayjs()
+  const navigate = useNavigate();
+
+  const [dateRange, setDateRange] = useState<DateRange>({
+    fromDate: dayjs().subtract(3, 'month'),
+    toDate: dayjs(),
   });
-  const [logs, setLogs] = useState([]);
-  const [offset, setOffset] = useState(0);
+  
+  const [logs, setLogs] = useState<LogItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const loaderRef = useRef(null);
 
-  // 期間が変わるたびにリセット
-  useEffect(() => {
-    setLogs([]);
-    setOffset(0);
-    setLoading(false);
-    setHasMore(!dateRange.fromDate.isAfter(dateRange.toDate));
-  }, [dateRange]);
+  const loaderRef = useRef<HTMLDivElement | null>(null);
+  const isFetchingRef = useRef(false);
 
-  // データ取得
-  const loadLogs = async () => {
-    if (loading || !hasMore) return;
+  const isValidRange =
+    !!dateRange.fromDate &&
+    !!dateRange.toDate &&
+    !dateRange.fromDate.isAfter(dateRange.toDate);
 
-    setLoading(true);
-
-    const start = dateRange.fromDate.startOf("day").toISOString();
-    const end = dateRange.toDate.add(1, "day").startOf("day").toISOString();
-
-    try {
-      const response = await apiClient.get(`/container/me?start=${start}&end=${end}&offset=${offset}`);
-      
-      if (response.data.length == 0) {
-        setHasMore(false);
-      } else {
-        setLogs((prev) => [...prev, ...response.data]);
-        setOffset((prev) => prev + response.data.length);
-      }
-    } catch {
-      setHasMore(false);
-    }
-    finally {
-      setLoading(false);
-    }
+  // ★ 修正箇所: LogItem 全体を受け取り、state 経由で遷移先へ渡す
+  const handleContainerClick = (item: LogItem) => {
+    const targetId = item.id ?? 'dummy-container-uuid';
+    navigate(`/general/log/${targetId}`, {
+      state: {
+        containerData: item, // 詳細画面へデータを渡す
+      },
+    });
   };
 
-  // スクロール監視
+  const handleDateChange = (newRange: DateRange) => {
+    const valid =
+      !!newRange.fromDate &&
+      !!newRange.toDate &&
+      !newRange.fromDate.isAfter(newRange.toDate);
+
+    setDateRange(newRange);
+    setLogs([]);
+    setHasMore(valid);
+    isFetchingRef.current = false;
+  };
+
+  const loadLogs = useCallback(async () => {
+    if (isFetchingRef.current || !hasMore || !isValidRange || !dateRange.fromDate || !dateRange.toDate) return;
+
+    isFetchingRef.current = true;
+    setLoading(true);
+
+    const start = dateRange.fromDate.startOf('day').toISOString();
+    const end = dateRange.toDate.add(1, 'day').startOf('day').toISOString();
+
+    try {
+      const currentOffset = logs.length;
+      const response = await apiClient.get<LogItem[]>(
+        `/container/me?start=${start}&end=${end}&offset=${currentOffset}`
+      );
+
+      if (!response.data || response.data.length === 0) {
+        setHasMore(false);
+      } else {
+        setLogs((prev) => {
+          const existingIds = new Set(prev.map((item) => item.id));
+          const uniqueNewItems = response.data.filter((item) => !existingIds.has(item.id));
+          return [...prev, ...uniqueNewItems];
+        });
+      }
+    } catch (error) {
+      console.error('ログ取得エラー:', error);
+      setHasMore(false);
+    } finally {
+      setLoading(false);
+      isFetchingRef.current = false;
+    }
+  }, [hasMore, isValidRange, dateRange, logs.length]);
+
   useEffect(() => {
-    if (!hasMore) return;
+    if (!hasMore || !isValidRange) return;
 
     const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !loading) {
+      if (entries[0].isIntersecting && !isFetchingRef.current) {
         loadLogs();
       }
     });
 
-    if (loaderRef.current) {
-      observer.observe(loaderRef.current);
+    const currentLoader = loaderRef.current;
+    if (currentLoader) {
+      observer.observe(currentLoader);
     }
 
-    return () => observer.disconnect();
-  }, [hasMore, loading]);
+    return () => {
+      if (currentLoader) {
+        observer.unobserve(currentLoader);
+      }
+      observer.disconnect();
+    };
+  }, [hasMore, isValidRange, loadLogs]);
 
   return (
-    <>
-      <Container sx={{ position: "sticky", top: "60px", zIndex: 10, py: "20px", display: "flex", bgcolor: "white" }}>
-        <Box sx={{ flexGrow: 1 }} />
-        <DateRangeSelector dateRange={dateRange} setDateRange={setDateRange} />
-      </Container>
-      <Container sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-        {logs.map((item) => (
-          <LogContainer key={item.id} logData={item} />
-        ))}
-        {hasMore && <Box ref={loaderRef} />}
-        {!hasMore && logs.length == 0 && <Typography sx={{ fontSize: "16px", color: "grey" }}>No items</Typography>}
-        {loading && <CircularProgress size="30px" color="grey" aria-label="Loading…" />}
-      </Container>
-    </>
-  )
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        width: '100%',
+        overflow: 'hidden',
+        backgroundColor: '#F9F9F9',
+      }}
+    >
+      {/* 1. 日付選択エリア（上部固定） */}
+      <Box
+        sx={{
+          p: 2,
+          flexShrink: 0,
+          backgroundColor: '#FFFFFF',
+          borderBottom: '1px solid #E0E0E0',
+          display: 'flex',
+          justifyContent: 'flex-end',
+        }}
+      >
+        <Container maxWidth="md" disableGutters sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <DateRangeSelector dateRange={dateRange} onChange={handleDateChange} />
+        </Container>
+      </Box>
+
+      {/* 2. ログリスト領域（中央スクロールエリア） */}
+      <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto', bgcolor: '#FFFFFF', px: 2, py: 1 }}>
+        <Container maxWidth="md" disableGutters sx={{ display: 'flex', flexDirection: 'column' }}>
+          {logs.map((item, index) => (
+            <LogContainer
+              key={item.id ? `${item.id}-${index}` : index}
+              data={item}
+              onClick={() => handleContainerClick(item)} // ★ 修正箇所: item オブジェクトを渡す
+            />
+          ))}
+
+          {hasMore && <Box ref={loaderRef} sx={{ height: '20px', width: '100%' }} />}
+        
+          {!hasMore && logs.length === 0 && (
+            <Typography sx={{ fontSize: '14px', color: 'grey', my: 4, textAlign: 'center' }}>
+              {!isValidRange ? '正しい日付範囲を指定してください' : 'No items'}
+            </Typography>
+          )}
+
+          {loading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+              <CircularProgress size="24px" color="inherit" />
+            </Box>
+          )}
+        </Container>
+      </Box>
+    </Box>
+  );
 }
 
-export default GeneralLog
+export default GeneralLog;
