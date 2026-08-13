@@ -13,6 +13,12 @@ import GeneralApplication from './pages/general/accounting/application.tsx'
 import GeneralSetting from './pages/general/accounting/setting.tsx'
 import GeneralExpensePage from './pages/general/accounting/generalExpensePage.tsx'
 import TransportExpensePage from './pages/general/accounting/transportExpensePage.tsx'
+
+import AdminApproval from './pages/admin/accounting/approval.tsx'
+import ApprovalDetailPage from './pages/admin/accounting/approvalDetailPage.tsx'
+import AdminPrint from './pages/admin/accounting/print.tsx'
+import AdminAnalytics from './pages/admin/accounting/analytics.tsx'
+
 import apiClient, {setAccessToken} from './api/axiosInstance.tsx'
 import './App.css'
 
@@ -121,6 +127,7 @@ function App() {
 
           </Route>
 
+          {/* フッター・ヘッダー両方無しレイアウトへのアクセス */}
           <Route element={<BlankLayout />}>
 
             {/* 💡 動作テスト用: 申請詳細ページ（handle={{ slide: true }} で横スライド有効化） */}
@@ -142,7 +149,17 @@ function App() {
 
             {/* 管理者ユーザー承認ページへのアクセス（admin 専用） */}
             <Route path="/admin/approval" element={
-              isAdmin ? <GeneralLog /> : (isAuthenticated ? <Navigate to={defaultTarget} replace /> : <Navigate to="/login" replace />)
+              isAdmin ? <AdminApproval /> : (isAuthenticated ? <Navigate to={defaultTarget} replace /> : <Navigate to="/login" replace />)
+            } />
+
+            {/* 管理者ユーザー印刷ページへのアクセス（admin 専用） */}
+            <Route path="/admin/print" element={
+              isAdmin ? <AdminPrint /> : (isAuthenticated ? <Navigate to={defaultTarget} replace /> : <Navigate to="/login" replace />)
+            } />
+
+            {/* 管理者ユーザー分析・統計ページへのアクセス（admin 専用） */}
+            <Route path="/admin/analytics" element={
+              isAdmin ? <AdminAnalytics /> : (isAuthenticated ? <Navigate to={defaultTarget} replace /> : <Navigate to="/login" replace />)
             } />
 
           </Route>
@@ -151,6 +168,14 @@ function App() {
           <Route element={<HeaderOnlyLayout />}>
 
 
+          </Route>
+
+
+          <Route element={<BlankLayout />}>
+            {/* 管理者用 承認詳細ページ */}
+            <Route path="/admin/approval/:id" element={
+              isAdmin ? <ApprovalDetailPage /> : (isAuthenticated ? <Navigate to={defaultTarget} replace /> : <Navigate to="/login" replace />)
+            } handle={{ slide: true }} />
           </Route>
 
 

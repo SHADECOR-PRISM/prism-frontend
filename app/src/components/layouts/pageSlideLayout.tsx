@@ -7,6 +7,7 @@ import Box from '@mui/material/Box';
  */
 const SLIDE_PATH_PATTERNS = [
   '/general/log/:id',
+  '/admin/approval/:id',
 ];
 
 export default function PageSlideLayout() {
