@@ -2,6 +2,8 @@ import { type ReactNode } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import StatusIcon from './statusIcon';     
+import CategoryIcon from './categoryIcon'; 
 
 export interface LogItem {
   id: string | number;
@@ -26,11 +28,6 @@ export default function LogContainer({ data, actionArea, onClick }: LogContainer
     ? data.total_amount.toLocaleString()
     : String(data.total_amount ?? 0);
 
-  // カテゴリごとのバッジ色設定
-  const isExpense = data.category === '経費';
-  const categoryBgColor = isExpense ? '#90CAF9' : '#FFCC80'; // 青系 vs オレンジ系
-  const categoryTextColor = isExpense ? '#0D47A1' : '#E65100';
-
   return (
     <Box
       onClick={onClick}
@@ -49,16 +46,9 @@ export default function LogContainer({ data, actionArea, onClick }: LogContainer
       }}
     >
       {/* 1. 左端のステータスドット */}
-      <Box
-        sx={{
-          width: 8,
-          height: 8,
-          borderRadius: '50%',
-          bgcolor: '#FF5252', // 赤いドット
-          mr: 1.5,
-          flexShrink: 0,
-        }}
-      />
+      <Box sx={{ mr: 1, flexShrink: 0 }}>
+        <StatusIcon status={data.status} />
+      </Box>
 
       {/* 2. 中央の主要テキストエリア */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -83,21 +73,7 @@ export default function LogContainer({ data, actionArea, onClick }: LogContainer
 
         {/* 下段: カテゴリバッジ + 合計金額 */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-          <Box
-            sx={{
-              px: 1,
-              py: 0.2,
-              borderRadius: '4px',
-              bgcolor: categoryBgColor,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Typography sx={{ fontSize: '11px', fontWeight: 'bold', color: categoryTextColor }}>
-              {data.category || '未設定'}
-            </Typography>
-          </Box>
+          <CategoryIcon category={data.category} />
           <Typography sx={{ fontSize: '13px', color: '#666666' }}>
             合計: {amount}円
           </Typography>

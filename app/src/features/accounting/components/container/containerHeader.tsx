@@ -3,10 +3,9 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import Chip from '@mui/material/Chip';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import DirectionsSubwayIcon from '@mui/icons-material/DirectionsSubway';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { useNavigate } from 'react-router-dom';
 import { type LogItem } from './logContainer';
+import CategoryIcon from './categoryIcon'; 
 
 interface ContainerHeaderProps {
   containerId: string;
@@ -16,20 +15,12 @@ interface ContainerHeaderProps {
 export default function ContainerHeader({ containerId, data }: ContainerHeaderProps) {
   const navigate = useNavigate();
 
-  // 1. category から「経費」か「交通費」かを判定するロジック
-  const isExpense = data?.category === '経費';
-  const isTransport = data?.category === '交通費';
-
-  // カテゴリバッジの配色・アイコン切り替え
-  const categoryBgColor = isExpense ? '#E3F2FD' : isTransport ? '#FFF3E0' : '#EEEEEE';
-  const categoryTextColor = isExpense ? '#1976D2' : isTransport ? '#E65100' : '#666666';
-
-  // 2. 金額のフォーマット処理
+  // 金額のフォーマット処理
   const formattedAmount = typeof data?.total_amount === 'number'
     ? data.total_amount.toLocaleString()
     : String(data?.total_amount ?? 0);
 
-  // 3. ステータスに応じた Chip の設定
+  // ステータスに応じた Chip の設定
   const getStatusChip = (status?: string) => {
     switch (status) {
       case 'approved':
@@ -87,23 +78,7 @@ export default function ContainerHeader({ containerId, data }: ContainerHeaderPr
           {/* 下段: カテゴリバッジ + 申請日またはID */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
             {data?.category && (
-              <Box
-                sx={{
-                  px: 0.8,
-                  py: 0.1,
-                  borderRadius: '4px',
-                  bgcolor: categoryBgColor,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 0.3,
-                }}
-              >
-                {isTransport && <DirectionsSubwayIcon sx={{ fontSize: '12px', color: categoryTextColor }} />}
-                {isExpense && <ReceiptLongIcon sx={{ fontSize: '12px', color: categoryTextColor }} />}
-                <Typography sx={{ fontSize: '10px', fontWeight: 'bold', color: categoryTextColor }}>
-                  {data.category}
-                </Typography>
-              </Box>
+              <CategoryIcon category={data.category} />
             )}
 
             <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '11px' }}>
