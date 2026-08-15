@@ -17,6 +17,10 @@ import TransportExpensePage from './pages/general/accounting/transportExpensePag
 import AdminApproval from './pages/admin/accounting/approval.tsx'
 import ApprovalDetailPage from './pages/admin/accounting/approvalDetailPage.tsx'
 import AdminPrint from './pages/admin/accounting/print.tsx'
+import UserSelectPage from './pages/admin/accounting/userSelectPage.tsx'
+import PrintSettingPage from './pages/admin/accounting/printSettingPage'
+import PrintCheckApprovalPage from './pages/admin/accounting/printCheckApprovalPage';
+import PrintRemarkPage from './pages/admin/accounting/printRemarkPage';
 import AdminAnalytics from './pages/admin/accounting/analytics.tsx'
 
 import apiClient, {setAccessToken} from './api/axiosInstance.tsx'
@@ -167,15 +171,36 @@ function App() {
           {/* フッター無しレイアウトへのアクセス */}
           <Route element={<HeaderOnlyLayout />}>
 
+            {/* 個人明細出力 Step 1 (ユーザー選択ページ) */}
+            <Route path="/admin/print/personal" element={
+              isAdmin ? <UserSelectPage /> : (isAuthenticated ? <Navigate to={defaultTarget} replace /> : <Navigate to="/login" replace />)
+            } />
 
           </Route>
 
 
           <Route element={<BlankLayout />}>
+
             {/* 管理者用 承認詳細ページ */}
             <Route path="/admin/approval/:id" element={
               isAdmin ? <ApprovalDetailPage /> : (isAuthenticated ? <Navigate to={defaultTarget} replace /> : <Navigate to="/login" replace />)
             } handle={{ slide: true }} />
+
+            {/* 管理者用 印刷設定ページ */}
+            <Route path="/admin/print/setting" element={
+              isAdmin ? <PrintSettingPage /> : (isAuthenticated ? <Navigate to={defaultTarget} replace /> : <Navigate to="/login" replace />)
+            } handle={{ slide: true }} />
+
+            {/* 管理者用 印刷項目確認ページ */}
+            <Route path="/admin/print/check-approval" element={
+              isAdmin ? <PrintCheckApprovalPage /> : (isAuthenticated ? <Navigate to={defaultTarget} replace /> : <Navigate to="/login" replace />)
+            } />
+
+            {/* 管理者用 印刷書類への備考欄記入ページ */}
+            <Route path="/admin/print/remark" element={
+              isAdmin ? <PrintRemarkPage /> : (isAuthenticated ? <Navigate to={defaultTarget} replace /> : <Navigate to="/login" replace />)
+            } />
+
           </Route>
 
 

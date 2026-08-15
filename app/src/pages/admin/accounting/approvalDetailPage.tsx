@@ -36,9 +36,9 @@ export default function ApprovalDetailPage() {
     submitApproval,
   } = useApprovalDetails(id);
 
-  // 一覧へ戻る
+  // 呼び出し元の画面（一覧またはStep 3）へ戻る
   const handleBackToApproval = () => {
-    navigate('/admin/approval');
+    navigate(-1);
   };
 
   // 3way トグル変更時
