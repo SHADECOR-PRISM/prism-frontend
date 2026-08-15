@@ -127,7 +127,7 @@ export default function PrintCheckApprovalPage() {
   const handleNext = () => {
     if (isNextDisabled) return;
 
-    navigate('/admin/print/preview', {
+    navigate('/admin/print/remark', {
       state: {
         selectedUser,
         dateRange,
