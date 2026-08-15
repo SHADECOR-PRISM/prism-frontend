@@ -11,7 +11,7 @@ function AdminPrint() {
       {/* 1つ目のボタン：個人明細表 */}
       <Button
         variant="contained"
-        onClick={() => navigate('/admin/print/personal')} // 一旦ダミー遷移先
+        onClick={() => navigate('/admin/print/personal')}
         sx={{
           backgroundColor: '#FFFFFF',
           color: '#000000',
