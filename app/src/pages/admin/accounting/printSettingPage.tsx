@@ -39,7 +39,7 @@ export default function PrintSettingPage() {
   const handleNext = () => {
     if (!selectedUser || !isValidRange) return;
 
-    navigate('/admin/print/select', {
+    navigate('/admin/print/check-approval', {
       state: {
         selectedUser,
         dateRange: {
