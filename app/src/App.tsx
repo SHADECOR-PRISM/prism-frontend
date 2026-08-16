@@ -21,6 +21,7 @@ import UserSelectPage from './pages/admin/accounting/userSelectPage.tsx'
 import PrintSettingPage from './pages/admin/accounting/printSettingPage'
 import PrintCheckApprovalPage from './pages/admin/accounting/printCheckApprovalPage';
 import PrintRemarkPage from './pages/admin/accounting/printRemarkPage';
+import PrintCompletePage from './pages/admin/accounting/printCompletePage';
 import AdminAnalytics from './pages/admin/accounting/analytics.tsx'
 
 import apiClient, {setAccessToken} from './api/axiosInstance.tsx'
@@ -199,6 +200,11 @@ function App() {
             {/* 管理者用 印刷書類への備考欄記入ページ */}
             <Route path="/admin/print/remark" element={
               isAdmin ? <PrintRemarkPage /> : (isAuthenticated ? <Navigate to={defaultTarget} replace /> : <Navigate to="/login" replace />)
+            } />
+
+            {/* 管理者用 印刷ページ(完了画面も描画) */}
+            <Route path="/admin/print/complete" element={
+              isAdmin ? <PrintCompletePage /> : (isAuthenticated ? <Navigate to={defaultTarget} replace /> : <Navigate to="/login" replace />)
             } />
 
           </Route>
