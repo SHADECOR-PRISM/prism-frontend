@@ -8,16 +8,18 @@ import {
 } from '@react-pdf/renderer';
 import type { ExpenseReportData } from '../../types/reportTypes';
 
-// 日本語フォント (Noto Sans JP) の登録
+// フォント読み込み
+import notoSansRegular from '../../../../assets/fonts/NotoSansJP-Regular.ttf';
+import notoSansBold from '../../../../assets/fonts/NotoSansJP-Bold.ttf';
 Font.register({
   family: 'NotoSansJP',
   fonts: [
     {
-      src: 'https://fonts.gstatic.com/s/notosansjp/v52/-F6jfjtqLzI2JPCgQBnw7HFyzSD-AsregP8VFBEj75vY0rw-oME.ttf',
+      src: notoSansRegular,
       fontWeight: 'normal',
     },
     {
-      src: 'https://fonts.gstatic.com/s/notosansjp/v52/-F6jfjtqLzI2JPCgQBnw7HFyzSD-AsregP8VFJEj75vY0rw-oME.ttf',
+      src: notoSansBold,
       fontWeight: 'bold',
     },
   ],
@@ -25,131 +27,159 @@ Font.register({
 
 const styles = StyleSheet.create({
   page: {
-    paddingTop: 36,
-    paddingBottom: 48,
-    paddingHorizontal: 40,
+    paddingTop: 32,
+    paddingBottom: 40,
+    paddingHorizontal: 36,
     fontFamily: 'NotoSansJP',
-    fontSize: 9,
-    color: '#222222',
+    fontSize: 8.5,
+    color: '#1F2328',
   },
-  // ヘッダー部
-  headerContainer: {
+
+  // ==========================================
+  // 1. ヘッダー（タイトル & 押印欄）
+  // ==========================================
+  topHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginBottom: 16,
   },
   title: {
     fontSize: 16,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 16,
-    letterSpacing: 2,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  metaLeft: {
-    flexDirection: 'column',
-    gap: 4,
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  metaLabel: {
-    fontSize: 9,
-    color: '#555555',
-    width: 65,
-  },
-  metaValue: {
-    fontSize: 9,
-    fontWeight: 'normal',
-  },
-  totalAmountBox: {
-    marginTop: 6,
-    padding: 6,
-    backgroundColor: '#F5F7FA',
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#D0D7DE',
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 8,
-  },
-  totalAmountLabel: {
-    fontSize: 10,
-    fontWeight: 'bold',
     color: '#1F2328',
+    marginTop: 10,
   },
-  totalAmountValue: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#0969DA',
-  },
-  // 押印欄
+  // 押印枠（均等幅 & 正方形比率）
   stampTable: {
-    borderWidth: 1,
-    borderColor: '#333333',
     flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: '#777777',
   },
   stampColumn: {
     width: 48,
     borderRightWidth: 1,
-    borderColor: '#333333',
+    borderColor: '#777777',
   },
   stampColumnLast: {
     width: 48,
   },
   stampHeader: {
-    backgroundColor: '#F0F0F0',
+    backgroundColor: '#F2F4F7',
     borderBottomWidth: 1,
-    borderColor: '#333333',
+    borderColor: '#777777',
     paddingVertical: 3,
     textAlign: 'center',
     fontSize: 8,
     fontWeight: 'bold',
+    color: '#555555',
   },
   stampBody: {
-    height: 48,
+    height: 48, // 48x48 の正方形
   },
-  // セクション
-  section: {
-    marginTop: 12,
+
+  // ==========================================
+  // 2. 申請基本情報 & 合計金額
+  // ==========================================
+  infoGrid: {
+    marginBottom: 16,
+    borderBottomWidth: 1,
+    borderColor: '#E9ECEF',
+    paddingBottom: 10,
+    gap: 6,
   },
-  sectionTitle: {
-    fontSize: 10,
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  infoItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  infoItemRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  infoLabel: {
+    fontSize: 8.5,
     fontWeight: 'bold',
-    marginBottom: 6,
+    color: '#666666',
+    width: 55,
+  },
+  infoValue: {
+    fontSize: 9,
+    fontWeight: 'normal',
     color: '#1F2328',
   },
+  applicantValue: {
+    fontSize: 9.5,
+    fontWeight: 'bold',
+    color: '#1F2328',
+  },
+  totalAmountLabel: {
+    fontSize: 9.5,
+    fontWeight: 'bold',
+    color: '#1F2328',
+    marginRight: 6,
+  },
+  totalAmountValue: {
+    fontSize: 12.5,
+    fontWeight: 'bold',
+    color: '#0056B3',
+    borderBottomWidth: 2,
+    borderColor: '#0056B3',
+    paddingBottom: 1,
+  },
+
+  // ==========================================
+  // 3. セクション共通
+  // ==========================================
+  section: {
+    marginBottom: 14,
+  },
+  sectionTitle: {
+    fontSize: 9.5,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#1F2328',
+  },
+
   // テーブル共通
   table: {
-    borderWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderTopWidth: 1.5,
+    borderBottomWidth: 1,
     borderColor: '#CCCCCC',
+    borderTopColor: '#495057',
   },
   tableRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderColor: '#E1E4E8',
-    minHeight: 20,
+    borderColor: '#E0E0E0',
+    minHeight: 18,
     alignItems: 'center',
   },
   tableRowHeader: {
-    backgroundColor: '#F6F8FA',
+    backgroundColor: '#E9ECEF',
     borderBottomWidth: 1,
-    borderColor: '#CCCCCC',
+    borderBottomColor: '#495057',
+    minHeight: 19,
   },
   tableCellHeader: {
     fontSize: 8,
     fontWeight: 'bold',
-    color: '#444444',
+    color: '#333333',
     paddingHorizontal: 4,
-    paddingVertical: 4,
+    paddingVertical: 3,
   },
   tableCell: {
     fontSize: 8,
+    color: '#1F2328',
     paddingHorizontal: 4,
-    paddingVertical: 3,
+    paddingVertical: 2.5,
   },
   textCenter: {
     textAlign: 'center',
@@ -157,55 +187,68 @@ const styles = StyleSheet.create({
   textRight: {
     textAlign: 'right',
   },
-  // 交通費テーブル列幅
-  colTrDate: { width: '15%' },
-  colTrProject: { width: '22%' },
+
+  // 交通費列幅（Excelの幅比率 12 : 16 : 13 : 23 : 12 : 24 に対応）
+  colTrDate: { width: '12%' },
+  colTrProject: { width: '16%' },
   colTrCategory: { width: '13%' },
-  colTrRoute: { width: '28%' },
+  colTrRoute: { width: '27%' },
   colTrRound: { width: '10%' },
-  colTrAmount: { width: '12%' },
-  // 経費テーブル列幅
-  colExDate: { width: '15%' },
-  colExProject: { width: '22%' },
-  colExCategory: { width: '18%' },
-  colExRemark: { width: '33%' },
-  colExAmount: { width: '12%' },
-  // 小計行
-  subtotalRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingVertical: 4,
-    paddingHorizontal: 6,
-    gap: 8,
+  colTrAmount: { width: '22%' },
+
+  // 経費列幅（Excelの幅比率 12 : 16 : 13 : 35 : 24 に対応）
+  colExDate: { width: '12%' },
+  colExProject: { width: '16%' },
+  colExCategory: { width: '13%' },
+  colExRemark: { width: '37%' },
+  colExAmount: { width: '22%' },
+
+  // テーブル内小計行
+  tableRowSubtotal: {
+    backgroundColor: '#F8F9FA',
+    borderTopWidth: 1,
+    borderTopColor: '#888888',
+    minHeight: 18,
   },
-  subtotalLabel: {
-    fontSize: 8,
-    fontWeight: 'bold',
-    color: '#555555',
-  },
-  subtotalValue: {
-    fontSize: 9,
+  subtotalLabelCell: {
+    fontSize: 8.5,
     fontWeight: 'bold',
     color: '#1F2328',
+    paddingRight: 8,
+    textAlign: 'right',
   },
-  // 備考欄
+  subtotalValueCell: {
+    fontSize: 8.5,
+    fontWeight: 'bold',
+    color: '#1F2328',
+    paddingHorizontal: 4,
+    textAlign: 'right',
+  },
+
+  // ==========================================
+  // 4. 備考欄
+  // ==========================================
   notesBox: {
     borderWidth: 1,
     borderColor: '#CCCCCC',
+    backgroundColor: '#FCFDFD',
     borderRadius: 2,
-    padding: 8,
-    minHeight: 40,
+    padding: 6,
+    minHeight: 38,
   },
   notesText: {
     fontSize: 8,
     color: '#333333',
     lineHeight: 1.4,
   },
-  // フッター
+
+  // ==========================================
+  // 5. フッター（ページ番号）
+  // ==========================================
   pageNumber: {
     position: 'absolute',
-    fontSize: 8,
-    bottom: 24,
+    fontSize: 7.5,
+    bottom: 18,
     left: 0,
     right: 0,
     textAlign: 'center',
@@ -221,68 +264,71 @@ export default function ExpenseReportPDF({ data }: ExpenseReportPDFProps) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* ヘッダーエリア */}
-        <View style={styles.headerContainer}>
-          <Text style={styles.title}>経 費 ・ 交 通 費 精 算 書</Text>
-          <View style={styles.headerRow}>
-            {/* 左側：申請者情報 & 総合計額 */}
-            <View style={styles.metaLeft}>
-              <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>申請者氏名 :</Text>
-                <Text style={styles.metaValue}>
-                  {data.applicant.name} (ID: {data.applicant.userId})
-                </Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>作 成 日 :</Text>
-                <Text style={styles.metaValue}>{data.exportDate}</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>対象期間 :</Text>
-                <Text style={styles.metaValue}>
-                  {data.period.start} 〜 {data.period.end}
-                </Text>
-              </View>
+        {/* 1. タイトル & 押印欄 */}
+        <View style={styles.topHeaderRow}>
+          <Text style={styles.title}>経費・交通費精算書</Text>
 
-              <View style={styles.totalAmountBox}>
-                <Text style={styles.totalAmountLabel}>精算合計金額 :</Text>
-                <Text style={styles.totalAmountValue}>
-                  ¥ {data.totalAmount.toLocaleString()} -
-                </Text>
-              </View>
+          {/* 押印枠（会計・副代表・代表） */}
+          <View style={styles.stampTable}>
+            <View style={styles.stampColumn}>
+              <Text style={styles.stampHeader}>会計</Text>
+              <View style={styles.stampBody} />
             </View>
-
-            {/* 右側：承認押印欄（経理・副代表・代表） */}
-            <View style={styles.stampTable}>
-              <View style={styles.stampColumn}>
-                <Text style={styles.stampHeader}>経理</Text>
-                <View style={styles.stampBody} />
-              </View>
-              <View style={styles.stampColumn}>
-                <Text style={styles.stampHeader}>副代表</Text>
-                <View style={styles.stampBody} />
-              </View>
-              <View style={styles.stampColumnLast}>
-                <Text style={styles.stampHeader}>代表</Text>
-                <View style={styles.stampBody} />
-              </View>
+            <View style={styles.stampColumn}>
+              <Text style={styles.stampHeader}>副代表</Text>
+              <View style={styles.stampBody} />
+            </View>
+            <View style={styles.stampColumnLast}>
+              <Text style={styles.stampHeader}>代表</Text>
+              <View style={styles.stampBody} />
             </View>
           </View>
         </View>
 
-        {/* 1. 交通費明細セクション */}
+        {/* 2. 基本情報 & 精算合計金額 */}
+        <View style={styles.infoGrid}>
+          <View style={styles.infoRow}>
+            <View style={styles.infoItemLeft}>
+              <Text style={styles.infoLabel}>対象期間 :</Text>
+              <Text style={styles.infoValue}>
+                {data.period.start} 〜 {data.period.end}
+              </Text>
+            </View>
+            <View style={styles.infoItemRight}>
+              <Text style={styles.infoLabel}>出力日 :</Text>
+              <Text style={styles.infoValue}>{data.exportDate}</Text>
+            </View>
+          </View>
+
+          <View style={styles.infoRow}>
+            <View style={styles.infoItemLeft}>
+              <Text style={styles.infoLabel}>申請者 :</Text>
+              <Text style={styles.applicantValue}>
+                {data.applicant.name} ({data.applicant.userId})
+              </Text>
+            </View>
+            <View style={styles.infoItemRight}>
+              <Text style={styles.totalAmountLabel}>精算合計金額 :</Text>
+              <Text style={styles.totalAmountValue}>
+                ¥{data.totalAmount.toLocaleString()}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* 3. 交通費明細セクション */}
         {data.transportation.items.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>■ 1. 交通費明細</Text>
+            <Text style={styles.sectionTitle}>1. 交通費明細</Text>
             <View style={styles.table}>
               {/* テーブルヘッダー */}
               <View style={[styles.tableRow, styles.tableRowHeader]}>
                 <Text style={[styles.tableCellHeader, styles.colTrDate, styles.textCenter]}>利用日</Text>
-                <Text style={[styles.tableCellHeader, styles.colTrProject]}>プロジェクト</Text>
-                <Text style={[styles.tableCellHeader, styles.colTrCategory, styles.textCenter]}>手段</Text>
-                <Text style={[styles.tableCellHeader, styles.colTrRoute]}>区間 (発〜着)</Text>
-                <Text style={[styles.tableCellHeader, styles.colTrRound, styles.textCenter]}>往復</Text>
-                <Text style={[styles.tableCellHeader, styles.colTrAmount, styles.textRight]}>金額(円)</Text>
+                <Text style={[styles.tableCellHeader, styles.colTrProject]}>プロジェクト名</Text>
+                <Text style={[styles.tableCellHeader, styles.colTrCategory, styles.textCenter]}>交通機関</Text>
+                <Text style={[styles.tableCellHeader, styles.colTrRoute]}>利用区間</Text>
+                <Text style={[styles.tableCellHeader, styles.colTrRound, styles.textCenter]}>往復/片道</Text>
+                <Text style={[styles.tableCellHeader, styles.colTrAmount, styles.textRight]}>金額</Text>
               </View>
 
               {/* 明細行（自動改ページ対応） */}
@@ -296,34 +342,34 @@ export default function ExpenseReportPDF({ data }: ExpenseReportPDFProps) {
                     {item.isRoundTrip ? '往復' : '片道'}
                   </Text>
                   <Text style={[styles.tableCell, styles.colTrAmount, styles.textRight]}>
-                    {item.amount.toLocaleString()}
+                    ¥{item.amount.toLocaleString()}
                   </Text>
                 </View>
               ))}
-            </View>
 
-            {/* 小計 */}
-            <View style={styles.subtotalRow} wrap={false}>
-              <Text style={styles.subtotalLabel}>交通費小計 :</Text>
-              <Text style={styles.subtotalValue}>
-                ¥ {data.transportation.subtotal.toLocaleString()} -
-              </Text>
+              {/* 交通費小計行 */}
+              <View style={[styles.tableRow, styles.tableRowSubtotal]} wrap={false}>
+                <Text style={[styles.subtotalLabelCell, { width: '78%' }]}>交通費 小計</Text>
+                <Text style={[styles.subtotalValueCell, { width: '22%' }]}>
+                  ¥{data.transportation.subtotal.toLocaleString()}
+                </Text>
+              </View>
             </View>
           </View>
         )}
 
-        {/* 2. 経費明細セクション */}
+        {/* 4. 経費明細セクション */}
         {data.expenses.items.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>■ 2. 経費明細</Text>
+            <Text style={styles.sectionTitle}>2. 経費明細</Text>
             <View style={styles.table}>
               {/* テーブルヘッダー */}
               <View style={[styles.tableRow, styles.tableRowHeader]}>
                 <Text style={[styles.tableCellHeader, styles.colExDate, styles.textCenter]}>利用日</Text>
-                <Text style={[styles.tableCellHeader, styles.colExProject]}>プロジェクト</Text>
-                <Text style={[styles.tableCellHeader, styles.colExCategory]}>カテゴリ</Text>
-                <Text style={[styles.tableCellHeader, styles.colExRemark]}>利用用途 (備考)</Text>
-                <Text style={[styles.tableCellHeader, styles.colExAmount, styles.textRight]}>金額(円)</Text>
+                <Text style={[styles.tableCellHeader, styles.colExProject]}>プロジェクト名</Text>
+                <Text style={[styles.tableCellHeader, styles.colExCategory, styles.textCenter]}>勘定科目</Text>
+                <Text style={[styles.tableCellHeader, styles.colExRemark]}>利用目的・備考</Text>
+                <Text style={[styles.tableCellHeader, styles.colExAmount, styles.textRight]}>金額</Text>
               </View>
 
               {/* 明細行 */}
@@ -331,36 +377,36 @@ export default function ExpenseReportPDF({ data }: ExpenseReportPDFProps) {
                 <View key={`ex-${idx}`} style={styles.tableRow} wrap={false}>
                   <Text style={[styles.tableCell, styles.colExDate, styles.textCenter]}>{item.usageDate}</Text>
                   <Text style={[styles.tableCell, styles.colExProject]}>{item.projectName}</Text>
-                  <Text style={[styles.tableCell, styles.colExCategory]}>{item.category}</Text>
+                  <Text style={[styles.tableCell, styles.colExCategory, styles.textCenter]}>{item.category}</Text>
                   <Text style={[styles.tableCell, styles.colExRemark]}>{item.remark}</Text>
                   <Text style={[styles.tableCell, styles.colExAmount, styles.textRight]}>
-                    {item.amount.toLocaleString()}
+                    ¥{item.amount.toLocaleString()}
                   </Text>
                 </View>
               ))}
-            </View>
 
-            {/* 小計 */}
-            <View style={styles.subtotalRow} wrap={false}>
-              <Text style={styles.subtotalLabel}>経費小計 :</Text>
-              <Text style={styles.subtotalValue}>
-                ¥ {data.expenses.subtotal.toLocaleString()} -
-              </Text>
+              {/* 経費小計行 */}
+              <View style={[styles.tableRow, styles.tableRowSubtotal]} wrap={false}>
+                <Text style={[styles.subtotalLabelCell, { width: '78%' }]}>経費 小計</Text>
+                <Text style={[styles.subtotalValueCell, { width: '22%' }]}>
+                  ¥{data.expenses.subtotal.toLocaleString()}
+                </Text>
+              </View>
             </View>
           </View>
         )}
 
-        {/* 3. 備考・連絡事項 */}
-        <View style={styles.section} wrap={false}>
-          <Text style={styles.sectionTitle}>■ 3. 備考・連絡事項</Text>
-          <View style={styles.notesBox}>
-            <Text style={styles.notesText}>
-              {data.notes || '※ 領収書原本は本紙に添付して経理担当者へ提出してください。'}
-            </Text>
+        {/* 5. 備考・特記事項 */}
+        {data.notes ? (
+          <View style={styles.section} wrap={false}>
+            <Text style={styles.sectionTitle}>■ 備考・特記事項</Text>
+            <View style={styles.notesBox}>
+              <Text style={styles.notesText}>{data.notes}</Text>
+            </View>
           </View>
-        </View>
+        ) : null}
 
-        {/* ページ番号（フッター） */}
+        {/* 6. フッター（ページ番号） */}
         <Text
           style={styles.pageNumber}
           render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}
