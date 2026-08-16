@@ -5,6 +5,9 @@ export interface TransportReportItem {
   route: string;    // '三ノ宮 〜 大阪' 等
   isRoundTrip: boolean;
   amount: number;
+  userName?: string;      // ★ 追加
+  applicantName?: string; // ★ 追加
+  userId?: string;        // ★ 追加
 }
 
 export interface ExpenseReportItem {
@@ -13,6 +16,9 @@ export interface ExpenseReportItem {
   category: string; // '消耗品費', 'サーバー費' 等
   remark: string;
   amount: number;
+  userName?: string;      // ★ 追加
+  applicantName?: string; // ★ 追加
+  userId?: string;        // ★ 追加
 }
 
 export interface ExpenseReportData {

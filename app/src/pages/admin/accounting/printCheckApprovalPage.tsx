@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import Box from '@mui/material/Box';
@@ -14,6 +14,7 @@ import UserContainerHeader from '../../../features/accounting/components/print/u
 import LogContainer, { type LogItem } from '../../../features/accounting/components/container/logContainer';
 
 interface LocationState {
+  mode?: 'personal' | 'overall';
   selectedUser?: AdminUserItem;
   dateRange?: {
     fromDate: string;
@@ -27,80 +28,67 @@ export default function PrintCheckApprovalPage() {
   const location = useLocation();
   const state = location.state as LocationState | undefined;
 
+  const mode: 'personal' | 'overall' = state?.mode || (state?.selectedUser ? 'personal' : 'overall');
+  const isPersonal = mode === 'personal';
   const selectedUser = state?.selectedUser;
   const dateRange = state?.dateRange;
   const exportFormat = state?.exportFormat || 'pdf';
 
   const [logs, setLogs] = useState<LogItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const loaderRef = useRef<HTMLDivElement | null>(null);
-  const isFetchingRef = useRef(false);
-
-  // 対象ユーザーのログ取得 API
-  const loadLogs = useCallback(async () => {
-    if (isFetchingRef.current || !hasMore || !selectedUser || !dateRange?.fromDate || !dateRange?.toDate) return;
-
-    isFetchingRef.current = true;
-    setLoading(true);
-
-    const start = dayjs(dateRange.fromDate).startOf('day').toISOString();
-    const end = dayjs(dateRange.toDate).add(1, 'day').startOf('day').toISOString();
-
-    try {
-      const currentOffset = logs.length;
-      const response = await apiClient.get<LogItem[]>(
-        `/admin/container/user/${selectedUser.id}?start=${start}&end=${end}&offset=${currentOffset}`
-      );
-
-      if (!response.data || response.data.length === 0) {
-        setHasMore(false);
-      } else {
-        setLogs((prev) => {
-          const existingIds = new Set(prev.map((item) => item.id));
-          const uniqueNewItems = response.data.filter((item) => !existingIds.has(item.id));
-
-          if (uniqueNewItems.length === 0) {
-            setHasMore(false);
-            return prev;
-          }
-          return [...prev, ...uniqueNewItems];
-        });
-      }
-    } catch (error) {
-      console.error('伝票ログ取得エラー:', error);
-      setHasMore(false);
-    } finally {
-      setLoading(false);
-      isFetchingRef.current = false;
-    }
-  }, [hasMore, selectedUser, dateRange, logs.length]);
-
-  // 無限スクロールの検知
+  // 1回のリクエストで期間内の全件を一括取得（limit=1000）
   useEffect(() => {
-    if (!hasMore) return;
+    let isMounted = true;
 
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !isFetchingRef.current) {
-        loadLogs();
+    async function fetchAllLogs() {
+      if (!dateRange?.fromDate || !dateRange?.toDate) {
+        setLoading(false);
+        return;
       }
-    });
+      if (isPersonal && !selectedUser) {
+        setLoading(false);
+        return;
+      }
 
-    const currentLoader = loaderRef.current;
-    if (currentLoader) {
-      observer.observe(currentLoader);
+      setLoading(true);
+      setError(null);
+
+      const start = dayjs(dateRange.fromDate).startOf('day').toISOString();
+      const end = dayjs(dateRange.toDate).add(1, 'day').startOf('day').toISOString();
+
+      try {
+        // limit=1000, offset=0 を指定して1発取得
+        const endpoint = isPersonal
+          ? `/admin/container/user/${selectedUser!.id}?start=${start}&end=${end}&offset=0&limit=1000`
+          : `/admin/container/all?start=${start}&end=${end}&offset=0&limit=1000`;
+
+        const response = await apiClient.get<LogItem[]>(endpoint);
+
+        if (isMounted) {
+          setLogs(response.data || []);
+        }
+      } catch (err) {
+        console.error('伝票ログ一括取得エラー:', err);
+        if (isMounted) {
+          setError('伝票一覧の取得に失敗しました');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
     }
+
+    void fetchAllLogs();
 
     return () => {
-      if (currentLoader) {
-        observer.unobserve(currentLoader);
-      }
-      observer.disconnect();
+      isMounted = false;
     };
-  }, [hasMore, loadLogs]);
+  }, [isPersonal, selectedUser, dateRange?.fromDate, dateRange?.toDate]);
 
-  // コンテナクリック時：詳細画面へ遷移しデータ受け渡し
+  // コンテナクリック時：承認詳細画面へ遷移
   const handleContainerClick = (item: LogItem) => {
     const targetId = item.id;
     if (!targetId) return;
@@ -110,29 +98,31 @@ export default function PrintCheckApprovalPage() {
     });
   };
 
-  // ★ 全ての伝票が承認済みかどうかを判定
-  // （※DBのステータス値に合わせて 'approved' または 'approval' を判定）
-  const isAllApproved = useMemo(() => {
-    if (logs.length === 0) return false;
-    return logs.every((item) => {
+  // 承認済み伝票のみを抽出
+  const approvedLogs = useMemo(() => {
+    return logs.filter((item) => {
       const s = (item.status || '').toLowerCase();
       return s === 'approved' || s === 'approval';
     });
   }, [logs]);
 
-  // Nextボタンの活性条件: 読み込み中以外、全データ読み込み完了、全件承認済み
-  const isNextDisabled = loading || hasMore || !isAllApproved;
+  // 未承認伝票の存在チェック
+  const hasUnapproved = logs.length > approvedLogs.length;
 
-  // Step 4（プレビュー確認）へ進む
+  // Nextボタンの活性条件: 読み込み中以外、エラーなし、承認済み伝票が1件以上あること
+  const isNextDisabled = loading || !!error || approvedLogs.length === 0;
+
+  // Step 3（備考入力画面）へ進む（承認済みデータのみを引き継ぐ）
   const handleNext = () => {
     if (isNextDisabled) return;
 
     navigate('/admin/print/remark', {
       state: {
+        mode,
         selectedUser,
         dateRange,
         exportFormat,
-        selectedContainers: logs,
+        selectedContainers: approvedLogs, // ★ 承認済み伝票（全件）を渡す
       },
     });
   };
@@ -148,19 +138,35 @@ export default function PrintCheckApprovalPage() {
         overflow: 'hidden',
       }}
     >
-      {/* 1. ユーザーコンテナヘッダー */}
+      {/* 1. 最上部ヘッダー（個人: ユーザー情報 / 全体: タイトルバー） */}
       <Box sx={{ width: '100%', flexShrink: 0 }}>
         <Container maxWidth="xs" disableGutters>
-          <UserContainerHeader data={selectedUser} />
+          {isPersonal ? (
+            <UserContainerHeader data={selectedUser} />
+          ) : (
+            <Box
+              sx={{
+                py: 2,
+                px: 3,
+                borderBottom: '1px solid #EBEBEB',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <Typography sx={{ fontWeight: 'bold', fontSize: '18px', color: '#000000' }}>
+                全体支出明細出力
+              </Typography>
+            </Box>
+          )}
         </Container>
       </Box>
 
-      {/* 2. プログレスバー (Step 3: 50%) */}
+      {/* 2. プログレスバー (個人: 5段階のStep3=60%, 全体: 4段階のStep2=50%) */}
       <Box sx={{ width: '100%', pt: 3, pb: 2, flexShrink: 0 }}>
         <Container maxWidth="xs" sx={{ px: 3 }}>
           <LinearProgress
             variant="determinate"
-            value={50}
+            value={isPersonal ? 60 : 50}
             sx={{
               height: 6,
               borderRadius: 3,
@@ -174,18 +180,30 @@ export default function PrintCheckApprovalPage() {
         </Container>
       </Box>
 
-      {/* 未承認伝票が存在する場合の警告メッセージ */}
-      {!loading && !hasMore && logs.length > 0 && !isAllApproved && (
-        <Box sx={{ px: 3, pb: 1, flexShrink: 0 }}>
-          <Container maxWidth="xs" disableGutters>
-            <Alert severity="warning" sx={{ fontSize: '12px', py: 0.5 }}>
-              未承認の申請が含まれています。すべての申請が承認されるまで出力へ進めません。
+      {/* エラー / ステータス案内メッセージ */}
+      <Box sx={{ px: 3, pb: 1, flexShrink: 0 }}>
+        <Container maxWidth="xs" disableGutters>
+          {error && (
+            <Alert severity="error" sx={{ fontSize: '12px', py: 0.5 }}>
+              {error}
             </Alert>
-          </Container>
-        </Box>
-      )}
+          )}
 
-      {/* 3. 伝票一覧リスト領域（中央スクロールエリア） */}
+          {!loading && !error && logs.length > 0 && (
+            hasUnapproved ? (
+              <Alert severity="info" sx={{ fontSize: '12px', py: 0.5 }}>
+                未承認の申請が含まれています。出力時は承認済みの伝票（{approvedLogs.length}件）のみが対象となります。
+              </Alert>
+            ) : (
+              <Alert severity="success" sx={{ fontSize: '12px', py: 0.5 }}>
+                すべての申請（{approvedLogs.length}件）が承認済みです。
+              </Alert>
+            )
+          )}
+        </Container>
+      </Box>
+
+      {/* 3. 伝票一覧リスト領域 */}
       <Box
         sx={{
           flex: 1,
@@ -208,27 +226,29 @@ export default function PrintCheckApprovalPage() {
             px: 1,
           }}
         >
-          {logs.map((item, index) => (
-            <Box key={item.id ? `select-log-${item.id}` : `select-log-idx-${index}`} sx={{ width: '100%', boxSizing: 'border-box' }}>
-              <LogContainer
-                data={item}
-                onClick={() => handleContainerClick(item)}
-              />
+          {loading ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', my: 6, gap: 1.5 }}>
+              <CircularProgress size={32} />
+              <Typography sx={{ fontSize: '13px', color: '#666666' }}>
+                対象期間の伝票データを読み込み中...
+              </Typography>
             </Box>
-          ))}
-
-          {hasMore && <Box ref={loaderRef} sx={{ height: '20px', width: '100%' }} />}
-
-          {!hasMore && logs.length === 0 && (
+          ) : logs.length === 0 ? (
             <Typography sx={{ fontSize: '14px', color: 'grey', my: 6, textAlign: 'center' }}>
               対象期間内の申請データがありません
             </Typography>
-          )}
-
-          {loading && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-              <CircularProgress size="24px" color="inherit" />
-            </Box>
+          ) : (
+            logs.map((item, index) => (
+              <Box
+                key={item.id ? `select-log-${item.id}` : `select-log-idx-${index}`}
+                sx={{ width: '100%', boxSizing: 'border-box' }}
+              >
+                <LogContainer
+                  data={item}
+                  onClick={() => handleContainerClick(item)}
+                />
+              </Box>
+            ))
           )}
         </Container>
       </Box>
@@ -258,7 +278,7 @@ export default function PrintCheckApprovalPage() {
               },
             }}
           >
-            Next
+            {approvedLogs.length > 0 ? `Next (${approvedLogs.length}件出力)` : 'Next'}
           </Button>
         </Container>
       </Box>

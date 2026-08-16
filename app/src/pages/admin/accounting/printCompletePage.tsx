@@ -20,10 +20,17 @@ import { type LogItem } from '../../../features/accounting/components/container/
 import { type ContainerDetailData } from '../../../features/accounting/types/expenseTypes';
 import { type ExpenseReportData } from '../../../features/accounting/types/reportTypes';
 import { formatToReportData } from '../../../features/accounting/utils/reportDataFormatter';
+
+// 個人用出力コンポーネント
 import ExpenseReportPDF from '../../../features/accounting/components/print/expenseReportPDF';
 import { exportExpenseReportExcel } from '../../../features/accounting/components/print/expenseReportExcel';
 
+// 全体用出力コンポーネント（新規作成対象）
+import OverallExpenseReportPDF from '../../../features/accounting/components/print/overallExpenseReportPDF';
+import { exportOverallExpenseReportExcel } from '../../../features/accounting/components/print/overallExpenseReportExcel';
+
 interface LocationState {
+  mode?: 'personal' | 'overall';
   selectedUser?: AdminUserItem;
   dateRange?: {
     fromDate: string;
@@ -39,6 +46,8 @@ export default function PrintCompletePage() {
   const location = useLocation();
   const state = location.state as LocationState | undefined;
 
+  const mode: 'personal' | 'overall' = state?.mode || (state?.selectedUser ? 'personal' : 'overall');
+  const isPersonal = mode === 'personal';
   const selectedUser = state?.selectedUser;
   const dateRange = state?.dateRange;
   const exportFormat = state?.exportFormat || 'pdf';
@@ -54,9 +63,10 @@ export default function PrintCompletePage() {
 
     async function fetchAllDetails() {
       const containers = state?.selectedContainers || [];
-      const containerIds = containers.map((c) => c.id);
+      const containerIds = containers.map((c) => c.id).filter(Boolean);
 
-      if (!selectedUser || containerIds.length === 0) {
+      // 個人モード時は selectedUser が必須、全体モード時はコンテナ件数のみ検証
+      if ((isPersonal && !selectedUser) || containerIds.length === 0) {
         setLoading(false);
         setError('出力対象の申請データが見つかりません');
         return;
@@ -74,11 +84,18 @@ export default function PrintCompletePage() {
 
         const detailedContainers = response.data;
 
+        // 申請者情報の表示名分岐
+        const applicantName = isPersonal
+          ? (selectedUser?.name || selectedUser?.user_id || '申請者')
+          : '全体支出明細 (全メンバー)';
+
+        const applicantUserId = isPersonal ? (selectedUser?.user_id || '') : 'ALL_MEMBERS';
+
         // PDF/Excel用の帳票データ構造へ整形
         const formatted = formatToReportData({
           applicant: {
-            name: selectedUser.name || selectedUser.user_id || '申請者',
-            userId: selectedUser.user_id || '',
+            name: applicantName,
+            userId: applicantUserId,
           },
           period: {
             start: dayjs(dateRange?.fromDate || containers[0]?.applied_at),
@@ -108,13 +125,18 @@ export default function PrintCompletePage() {
     return () => {
       isMounted = false;
     };
-  }, [state?.selectedContainers, selectedUser, dateRange?.fromDate, dateRange?.toDate, remark]);
+  }, [state?.selectedContainers, isPersonal, selectedUser, dateRange?.fromDate, dateRange?.toDate, remark]);
 
+  // Excel ダウンロード処理（個人 / 全体で関数を切り替え）
   const handleDownloadExcel = async () => {
     if (!reportData) return;
     try {
       setIsExportingExcel(true);
-      await exportExpenseReportExcel(reportData);
+      if (isPersonal) {
+        await exportExpenseReportExcel(reportData);
+      } else {
+        await exportOverallExpenseReportExcel(reportData);
+      }
     } catch (err) {
       console.error('Excel出力エラー:', err);
       setError('Excelファイルの出力に失敗しました');
@@ -127,9 +149,16 @@ export default function PrintCompletePage() {
     navigate('/admin/print');
   };
 
+  // ファイル名設定（個人 / 全体）
+  const periodStr = reportData
+    ? `${reportData.period.start.replace(/\//g, '')}-${reportData.period.end.replace(/\//g, '')}`
+    : '';
+
   const fileName = reportData
-    ? `精算書_${reportData.applicant.name}_${reportData.period.start.replace(/\//g, '')}-${reportData.period.end.replace(/\//g, '')}.pdf`
-    : '精算書.pdf';
+    ? isPersonal
+      ? `精算書_${reportData.applicant.name}_${periodStr}.pdf`
+      : `全体支出明細_${periodStr}.pdf`
+    : '支出明細書.pdf';
 
   return (
     <Box
@@ -142,14 +171,30 @@ export default function PrintCompletePage() {
         overflow: 'hidden',
       }}
     >
-      {/* 1. ユーザーコンテナヘッダー */}
+      {/* 1. 最上部ヘッダー（個人: ユーザー情報 / 全体: タイトルバー） */}
       <Box sx={{ width: '100%', flexShrink: 0 }}>
         <Container maxWidth="xs" disableGutters>
-          <UserContainerHeader data={selectedUser} />
+          {isPersonal ? (
+            <UserContainerHeader data={selectedUser} />
+          ) : (
+            <Box
+              sx={{
+                py: 2,
+                px: 3,
+                borderBottom: '1px solid #EBEBEB',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <Typography sx={{ fontWeight: 'bold', fontSize: '18px', color: '#000000' }}>
+                全体支出明細出力
+              </Typography>
+            </Box>
+          )}
         </Container>
       </Box>
 
-      {/* 2. プログレスバー (Step 5: 100%) */}
+      {/* 2. プログレスバー (100% 完了) */}
       <Box sx={{ width: '100%', pt: 3, pb: 2, flexShrink: 0 }}>
         <Container maxWidth="xs" sx={{ px: 3 }}>
           <LinearProgress
@@ -198,7 +243,7 @@ export default function PrintCompletePage() {
             <Box sx={{ py: 6, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
               <CircularProgress size={44} />
               <Typography sx={{ fontSize: '14px', color: '#666666' }}>
-                精算書データを生成中...
+                {isPersonal ? '精算書データを生成中...' : '全体支出明細データを生成中...'}
               </Typography>
             </Box>
           ) : reportData ? (
@@ -207,17 +252,16 @@ export default function PrintCompletePage() {
 
               <Box>
                 <Typography sx={{ fontWeight: 'bold', fontSize: '18px', color: '#000000', mb: 0.5 }}>
-                  精算書の発行準備が完了しました
+                  {isPersonal ? '精算書の発行準備が完了しました' : '全体明細の発行準備が完了しました'}
                 </Typography>
                 <Typography sx={{ fontSize: '13px', color: '#666666' }}>
                   形式: {exportFormat.toUpperCase()} / 対象件数: {reportData.transportation.items.length + reportData.expenses.items.length}件 / 合計: ¥{reportData.totalAmount.toLocaleString()} -
                 </Typography>
               </Box>
 
-              {/* ダウンロードボタン（形式に応じて出し分け） */}
+              {/* ダウンロードボタン */}
               <Box sx={{ width: '100%', pt: 2 }}>
                 {exportFormat === 'xlsx' ? (
-                  /* Excel ダウンロードボタン */
                   <Button
                     fullWidth
                     variant="contained"
@@ -246,9 +290,14 @@ export default function PrintCompletePage() {
                     {isExportingExcel ? 'Excelファイル生成中...' : 'Excelをダウンロード'}
                   </Button>
                 ) : (
-                  /* PDF ダウンロードボタン */
                   <PDFDownloadLink
-                    document={<ExpenseReportPDF data={reportData} />}
+                    document={
+                      isPersonal ? (
+                        <ExpenseReportPDF data={reportData} />
+                      ) : (
+                        <OverallExpenseReportPDF data={reportData} />
+                      )
+                    }
                     fileName={fileName}
                     style={{ textDecoration: 'none', width: '100%' }}
                   >
@@ -288,7 +337,7 @@ export default function PrintCompletePage() {
         </Container>
       </Box>
 
-      {/* 4. フッターエリア (Top / 完了 ボタン) */}
+      {/* 4. フッターエリア (リセットボタン) */}
       <Box sx={{ pb: 3, pt: 1, flexShrink: 0 }}>
         <Container maxWidth="xs" sx={{ px: 3 }}>
           <Button
@@ -309,7 +358,7 @@ export default function PrintCompletePage() {
               },
             }}
           >
-            別の精算書を発行する
+            別の明細書を発行する
           </Button>
         </Container>
       </Box>

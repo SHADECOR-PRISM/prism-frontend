@@ -13,6 +13,7 @@ import { type LogItem } from '../../../features/accounting/components/container/
 const MAX_REMARK_LENGTH = 800;
 
 interface LocationState {
+  mode?: 'personal' | 'overall';
   selectedUser?: AdminUserItem;
   dateRange?: {
     fromDate: string;
@@ -27,6 +28,8 @@ export default function PrintRemarkPage() {
   const location = useLocation();
   const state = location.state as LocationState | undefined;
 
+  const mode: 'personal' | 'overall' = state?.mode || (state?.selectedUser ? 'personal' : 'overall');
+  const isPersonal = mode === 'personal';
   const selectedUser = state?.selectedUser;
   const dateRange = state?.dateRange;
   const exportFormat = state?.exportFormat || 'pdf';
@@ -36,12 +39,13 @@ export default function PrintRemarkPage() {
 
   const isOverLimit = remark.length > MAX_REMARK_LENGTH;
 
-  // Step 5（最終完了・出力画面）へ進む
+  // 最終完了・出力画面（PrintCompletePage）へ進む
   const handleNext = () => {
     if (isOverLimit) return;
 
     navigate('/admin/print/complete', {
       state: {
+        mode,
         selectedUser,
         dateRange,
         exportFormat,
@@ -62,19 +66,35 @@ export default function PrintRemarkPage() {
         overflow: 'hidden',
       }}
     >
-      {/* 1. ユーザーコンテナヘッダー */}
+      {/* 1. 最上部ヘッダー（個人: ユーザー情報 / 全体: タイトルバー） */}
       <Box sx={{ width: '100%', flexShrink: 0 }}>
         <Container maxWidth="xs" disableGutters>
-          <UserContainerHeader data={selectedUser} />
+          {isPersonal ? (
+            <UserContainerHeader data={selectedUser} />
+          ) : (
+            <Box
+              sx={{
+                py: 2,
+                px: 3,
+                borderBottom: '1px solid #EBEBEB',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <Typography sx={{ fontWeight: 'bold', fontSize: '18px', color: '#000000' }}>
+                全体支出明細出力
+              </Typography>
+            </Box>
+          )}
         </Container>
       </Box>
 
-      {/* 2. プログレスバー (Step 4: 90%) */}
+      {/* 2. プログレスバー (個人: 5段階中Step4=80%, 全体: 4段階中Step3=75%) */}
       <Box sx={{ width: '100%', pt: 3, pb: 2, flexShrink: 0 }}>
         <Container maxWidth="xs" sx={{ px: 3 }}>
           <LinearProgress
             variant="determinate"
-            value={90}
+            value={isPersonal ? 80 : 75}
             sx={{
               height: 6,
               borderRadius: 3,

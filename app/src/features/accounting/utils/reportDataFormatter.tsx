@@ -29,6 +29,15 @@ export function formatToReportData({
   const expenseItems: ExpenseReportItem[] = [];
 
   containers.forEach((container) => {
+    // 申請者氏名（user_name があれば優先、なければ user_id、個人指定時の applicant.name）
+    const containerUserName =
+      container.user_name ||
+      container.user_id ||
+      applicant.name ||
+      '-';
+
+    const containerUserId = container.user_id || applicant.userId || '';
+
     // 交通費明細の整形（承認済みカードのみ抽出）
     container.transportation_details?.forEach((item) => {
       if (item.status === 'approved') {
@@ -39,6 +48,9 @@ export function formatToReportData({
           route: `${item.departure || ''} 〜 ${item.arrival || ''}`,
           isRoundTrip: item.is_round_trip ?? true,
           amount: item.amount,
+          userName: containerUserName,
+          applicantName: containerUserName,
+          userId: containerUserId,
         });
       }
     });
@@ -52,6 +64,9 @@ export function formatToReportData({
           category: EXPENSE_CATEGORY_LABELS[item.category] || item.category,
           remark: item.remark || '-',
           amount: item.amount,
+          userName: containerUserName,
+          applicantName: containerUserName,
+          userId: containerUserId,
         });
       }
     });

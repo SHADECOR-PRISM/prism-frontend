@@ -68,13 +68,13 @@ export const EXPENSE_CATEGORY_LABELS: Record<ExpenseCategoryKey, string> = {
   others: 'その他雑費',
 };
 
-
 // ==========================================
 // GET /container/{container_id} レスポンス型
 // ==========================================
 export interface ContainerDetailData {
   id: string;
   user_id: string;
+  user_name?: string | null; // ★ バックエンドと合わせて追加
   project_name: string;
   category: string; // "交通費" または "経費"
   applied_at: string;
