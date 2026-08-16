@@ -16,6 +16,7 @@ import { type AdminUserItem } from '../../../components/elements/userContainer';
 import UserContainerHeader from '../../../features/accounting/components/print/userContainerHeader';
 
 interface LocationState {
+  mode?: 'personal' | 'overall';
   selectedUser?: AdminUserItem;
 }
 
@@ -23,6 +24,10 @@ export default function PrintSettingPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState | undefined;
+
+  // モード判定（selectedUser があれば personal、無ければ overall または state.mode 優先）
+  const mode: 'personal' | 'overall' = state?.mode || (state?.selectedUser ? 'personal' : 'overall');
+  const isPersonal = mode === 'personal';
   const selectedUser = state?.selectedUser;
 
   // フォームステート
@@ -35,12 +40,14 @@ export default function PrintSettingPage() {
     !!toDate &&
     !fromDate.isAfter(toDate);
 
-  // Step 3（伝票個別選択画面）へ進む
+  // Next ボタン押下時のハンドラー
   const handleNext = () => {
-    if (!selectedUser || !isValidRange) return;
+    if (!isValidRange) return;
+    if (isPersonal && !selectedUser) return;
 
     navigate('/admin/print/check-approval', {
       state: {
+        mode,
         selectedUser,
         dateRange: {
           fromDate: fromDate?.toISOString(),
@@ -63,19 +70,35 @@ export default function PrintSettingPage() {
           overflow: 'hidden',
         }}
       >
-        {/* 1. ユーザーコンテナヘッダー */}
+        {/* 1. 最上部ヘッダー（個別ならユーザー情報、全体なら全体用見出し） */}
         <Box sx={{ width: '100%', flexShrink: 0 }}>
           <Container maxWidth="xs" disableGutters>
-            <UserContainerHeader data={selectedUser} />
+            {isPersonal ? (
+              <UserContainerHeader data={selectedUser} />
+            ) : (
+              <Box
+                sx={{
+                  py: 2,
+                  px: 3,
+                  borderBottom: '1px solid #EBEBEB',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                <Typography sx={{ fontWeight: 'bold', fontSize: '18px', color: '#000000' }}>
+                  全体支出明細出力
+                </Typography>
+              </Box>
+            )}
           </Container>
         </Box>
 
-        {/* 2. プログレスバー (左右対称の余白で中央揃え) */}
+        {/* 2. プログレスバー (個別: 5段階のStep2=40%, 全体: 4段階のStep1=25%) */}
         <Box sx={{ width: '100%', pt: 3, pb: 2, flexShrink: 0 }}>
           <Container maxWidth="xs" sx={{ px: 3 }}>
             <LinearProgress
               variant="determinate"
-              value={1}
+              value={isPersonal ? 40 : 25}
               sx={{
                 height: 6,
                 borderRadius: 3,
@@ -159,7 +182,8 @@ export default function PrintSettingPage() {
                     bgcolor: '#FFFFFF',
                   }}
                 >
-                  <MenuItem value="pdf">PDF</MenuItem>
+                  <MenuItem value="pdf">PDF（.pdf）</MenuItem>
+                  <MenuItem value="xlsx">Excel（.xlsx）</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -173,7 +197,7 @@ export default function PrintSettingPage() {
               fullWidth
               variant="contained"
               onClick={handleNext}
-              disabled={!isValidRange}
+              disabled={!isValidRange || (isPersonal && !selectedUser)}
               sx={{
                 py: 1.5,
                 borderRadius: 2,

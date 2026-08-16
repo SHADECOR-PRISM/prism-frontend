@@ -11,7 +11,7 @@ function AdminPrint() {
       {/* 1つ目のボタン：個人明細表 */}
       <Button
         variant="contained"
-        onClick={() => navigate('/admin/print/personal')}
+        onClick={() => navigate('/admin/print/personal', { state: { mode: 'personal' } })}
         sx={{
           backgroundColor: '#FFFFFF',
           color: '#000000',
@@ -28,7 +28,7 @@ function AdminPrint() {
       {/* 2つ目のボタン：全体支出明細 */}
       <Button
         variant="contained"
-        onClick={() => navigate('/admin/print/overall')} // 一旦ダミー遷移先
+        onClick={() => navigate('/admin/print/setting', { state: { mode: 'overall' } })}
         sx={{
           backgroundColor: '#FFFFFF',
           color: '#000000',
