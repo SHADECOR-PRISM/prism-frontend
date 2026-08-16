@@ -10,6 +10,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import TableViewIcon from '@mui/icons-material/TableView';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import apiClient from '../../../api/axiosInstance';
@@ -20,6 +21,7 @@ import { type ContainerDetailData } from '../../../features/accounting/types/exp
 import { type ExpenseReportData } from '../../../features/accounting/types/reportTypes';
 import { formatToReportData } from '../../../features/accounting/utils/reportDataFormatter';
 import ExpenseReportPDF from '../../../features/accounting/components/print/expenseReportPDF';
+import { exportExpenseReportExcel } from '../../../features/accounting/components/print/expenseReportExcel';
 
 interface LocationState {
   selectedUser?: AdminUserItem;
@@ -39,9 +41,11 @@ export default function PrintCompletePage() {
 
   const selectedUser = state?.selectedUser;
   const dateRange = state?.dateRange;
+  const exportFormat = state?.exportFormat || 'pdf';
   const remark = state?.remark || '';
 
   const [loading, setLoading] = useState<boolean>(true);
+  const [isExportingExcel, setIsExportingExcel] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [reportData, setReportData] = useState<ExpenseReportData | null>(null);
 
@@ -70,7 +74,7 @@ export default function PrintCompletePage() {
 
         const detailedContainers = response.data;
 
-        // PDF用の帳票データ構造へ整形
+        // PDF/Excel用の帳票データ構造へ整形
         const formatted = formatToReportData({
           applicant: {
             name: selectedUser.name || selectedUser.user_id || '申請者',
@@ -105,6 +109,19 @@ export default function PrintCompletePage() {
       isMounted = false;
     };
   }, [state?.selectedContainers, selectedUser, dateRange?.fromDate, dateRange?.toDate, remark]);
+
+  const handleDownloadExcel = async () => {
+    if (!reportData) return;
+    try {
+      setIsExportingExcel(true);
+      await exportExpenseReportExcel(reportData);
+    } catch (err) {
+      console.error('Excel出力エラー:', err);
+      setError('Excelファイルの出力に失敗しました');
+    } finally {
+      setIsExportingExcel(false);
+    }
+  };
 
   const handleReset = () => {
     navigate('/admin/print');
@@ -193,46 +210,78 @@ export default function PrintCompletePage() {
                   精算書の発行準備が完了しました
                 </Typography>
                 <Typography sx={{ fontSize: '13px', color: '#666666' }}>
-                  対象件数: {reportData.transportation.items.length + reportData.expenses.items.length}件 / 合計: ¥{reportData.totalAmount.toLocaleString()} -
+                  形式: {exportFormat.toUpperCase()} / 対象件数: {reportData.transportation.items.length + reportData.expenses.items.length}件 / 合計: ¥{reportData.totalAmount.toLocaleString()} -
                 </Typography>
               </Box>
 
-              {/* PDFダウンロードリンクボタン */}
+              {/* ダウンロードボタン（形式に応じて出し分け） */}
               <Box sx={{ width: '100%', pt: 2 }}>
-                <PDFDownloadLink
-                  document={<ExpenseReportPDF data={reportData} />}
-                  fileName={fileName}
-                  style={{ textDecoration: 'none', width: '100%' }}
-                >
-                  {({ loading: pdfLoading }) => (
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      disabled={pdfLoading}
-                      startIcon={
-                        pdfLoading ? (
-                          <CircularProgress size={18} color="inherit" />
-                        ) : (
-                          <PictureAsPdfIcon />
-                        )
-                      }
-                      sx={{
-                        py: 1.5,
-                        borderRadius: 2,
-                        bgcolor: '#000000',
-                        color: '#FFFFFF',
-                        fontSize: '15px',
-                        fontWeight: 'bold',
-                        textTransform: 'none',
-                        '&:hover': {
-                          bgcolor: '#333333',
-                        },
-                      }}
-                    >
-                      {pdfLoading ? 'PDFファイル作成中...' : 'PDFをダウンロード'}
-                    </Button>
-                  )}
-                </PDFDownloadLink>
+                {exportFormat === 'xlsx' ? (
+                  /* Excel ダウンロードボタン */
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    onClick={handleDownloadExcel}
+                    disabled={isExportingExcel}
+                    startIcon={
+                      isExportingExcel ? (
+                        <CircularProgress size={18} color="inherit" />
+                      ) : (
+                        <TableViewIcon />
+                      )
+                    }
+                    sx={{
+                      py: 1.5,
+                      borderRadius: 2,
+                      bgcolor: '#2E7D32',
+                      color: '#FFFFFF',
+                      fontSize: '15px',
+                      fontWeight: 'bold',
+                      textTransform: 'none',
+                      '&:hover': {
+                        bgcolor: '#1B5E20',
+                      },
+                    }}
+                  >
+                    {isExportingExcel ? 'Excelファイル生成中...' : 'Excelをダウンロード'}
+                  </Button>
+                ) : (
+                  /* PDF ダウンロードボタン */
+                  <PDFDownloadLink
+                    document={<ExpenseReportPDF data={reportData} />}
+                    fileName={fileName}
+                    style={{ textDecoration: 'none', width: '100%' }}
+                  >
+                    {({ loading: pdfLoading }) => (
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        disabled={pdfLoading}
+                        startIcon={
+                          pdfLoading ? (
+                            <CircularProgress size={18} color="inherit" />
+                          ) : (
+                            <PictureAsPdfIcon />
+                          )
+                        }
+                        sx={{
+                          py: 1.5,
+                          borderRadius: 2,
+                          bgcolor: '#000000',
+                          color: '#FFFFFF',
+                          fontSize: '15px',
+                          fontWeight: 'bold',
+                          textTransform: 'none',
+                          '&:hover': {
+                            bgcolor: '#333333',
+                          },
+                        }}
+                      >
+                        {pdfLoading ? 'PDFファイル作成中...' : 'PDFをダウンロード'}
+                      </Button>
+                    )}
+                  </PDFDownloadLink>
+                )}
               </Box>
             </>
           ) : null}

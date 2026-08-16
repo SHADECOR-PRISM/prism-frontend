@@ -25,7 +25,7 @@ export default function PrintSettingPage() {
   const state = location.state as LocationState | undefined;
   const selectedUser = state?.selectedUser;
 
-  // フォームステート
+  // フォームステート (デフォルト: pdf)
   const [fromDate, setFromDate] = useState<Dayjs | null>(dayjs().subtract(1, 'month'));
   const [toDate, setToDate] = useState<Dayjs | null>(dayjs());
   const [exportFormat, setExportFormat] = useState<string>('pdf');
@@ -159,7 +159,8 @@ export default function PrintSettingPage() {
                     bgcolor: '#FFFFFF',
                   }}
                 >
-                  <MenuItem value="pdf">PDF</MenuItem>
+                  <MenuItem value="pdf">PDF（.pdf）</MenuItem>
+                  <MenuItem value="xlsx">Excel（.xlsx）</MenuItem>
                 </Select>
               </FormControl>
             </Box>
