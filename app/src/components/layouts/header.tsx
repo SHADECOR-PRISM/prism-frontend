@@ -9,6 +9,7 @@ import apiClient from '../../api/axiosInstance'
 function Header() {
   const [currentDate, setCurrentDate] = useState('----/--/--')
   const [userName, setUserName] = useState('----')
+  const [accountType, setAccountType] = useState('General')
 
   useEffect(() => {
     ;(async () => {
@@ -16,11 +17,14 @@ function Header() {
         const response = await apiClient.get('/users/me')
         setCurrentDate(response.data.current_date)
         setUserName(response.data.user_name)
+        setAccountType(response.data.account_type ?? 'General')
       } catch {
         console.error('Unable to load user information')
       }
     })()
   }, [])
+
+  const accountLabel = accountType === 'Admin' ? 'Admin acc.' : 'Normal acc.'
 
   return (
     <AppBar
@@ -81,7 +85,7 @@ function Header() {
               fontSize: 10,
             }}
           >
-            Normal Acc. / {userName}
+            {accountLabel} / {userName}
           </Typography>
         </Box>
       </Toolbar>
