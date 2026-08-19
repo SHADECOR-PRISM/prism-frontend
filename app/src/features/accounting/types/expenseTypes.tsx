@@ -80,6 +80,7 @@ export interface ContainerDetailData {
   applied_at: string;
   status: 'pending' | 'approved' | 'rejected';
   total_amount: number;
+  version: number;
   transportation_details: TransportDetail[];
   expense_details: GeneralExpenseDetail[];
 }
