@@ -104,6 +104,7 @@ export interface UpdateDetailPayload {
 
 export interface UpdateApplicationPayload {
   container_id: string;
+  version: number;
   updated_details: UpdateDetailPayload[];
   deleted_detail_ids: string[];
   is_all_deleted: boolean;
@@ -117,6 +118,7 @@ export interface UpdateApplicationPayload {
  */
 export const buildUpdateApplicationPayload = (
   containerId: string,
+  version: number,
   categoryName: string, // "交通費" または "経費"
   cards: BaseDetail[],
   deletedDetailIds: string[]
@@ -154,6 +156,7 @@ export const buildUpdateApplicationPayload = (
 
   return {
     container_id: containerId,
+    version,
     updated_details: updatedDetails,
     deleted_detail_ids: deletedDetailIds,
     is_all_deleted: isAllDeleted,

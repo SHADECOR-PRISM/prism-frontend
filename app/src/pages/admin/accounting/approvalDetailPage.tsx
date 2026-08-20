@@ -9,6 +9,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 import CardStackLayout from '../../../components/layouts/cardStackLayout';
 import ContainerHeader from '../../../features/accounting/components/container/containerHeader';
+import StatusIcon from '../../../features/accounting/components/container/statusIcon';
 import { useApprovalDetails } from '../../../features/accounting/hooks/useApprovalDetails';
 import {
   TRANSPORT_CATEGORY_LABELS,
@@ -54,10 +55,7 @@ export default function ApprovalDetailPage() {
   const handleSubmit = async () => {
     const result = await submitApproval();
     if (result.success) {
-      alert('承認結果を保存しました。');
       handleBackToApproval();
-    } else {
-      alert('承認ステータスの保存に失敗しました。');
     }
   };
 
@@ -122,10 +120,13 @@ export default function ApprovalDetailPage() {
                     }}
                   >
                     <Box>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          利用日: {transportItem.usage_date}
-                        </Typography>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                          <StatusIcon status={currentStatus} />
+                          <Typography variant="caption" color="text.secondary">
+                            利用日: {transportItem.usage_date}
+                          </Typography>
+                        </Box>
                         <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
                           {TRANSPORT_CATEGORY_LABELS[transportItem.category as TransportCategoryKey] || transportItem.category}
                         </Typography>
@@ -204,10 +205,13 @@ export default function ApprovalDetailPage() {
                     }}
                   >
                     <Box>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          利用日: {expenseItem.usage_date}
-                        </Typography>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                          <StatusIcon status={currentStatus} />
+                          <Typography variant="caption" color="text.secondary">
+                            利用日: {expenseItem.usage_date}
+                          </Typography>
+                        </Box>
                         <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
                           {EXPENSE_CATEGORY_LABELS[expenseItem.category as ExpenseCategoryKey] || expenseItem.category}
                         </Typography>

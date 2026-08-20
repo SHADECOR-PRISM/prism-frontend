@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import axios from 'axios';
 import apiClient from '../../../api/axiosInstance';
 import { updateApplicationRequest } from '../api/requestsApi';
-import { canEditCard, isTempId } from '../utils/expensePolicy';
+import { canDeleteCard, canEditCard, isTempId } from '../utils/expensePolicy';
 import { buildUpdateApplicationPayload } from '../utils/payloadBuilder'; // ★ 追加
 import type { ContainerDetailData, BaseDetail } from '../types/expenseTypes';
 
@@ -22,50 +23,38 @@ export function useLogDetails<T extends BaseDetail>(containerId: string | undefi
   // 送信中のローディング状態
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // 1. データ取得処理
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
     if (!containerId) return;
 
-    let isMounted = true;
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await apiClient.get<ContainerDetailData>(`/container/${containerId}`);
+      const data = response.data;
+      setContainerData(data);
 
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await apiClient.get<ContainerDetailData>(`/container/${containerId}`);
-        if (!isMounted) return;
+      // カテゴリに応じて明細カードを配列化
+      const rawDetails = (
+        data.category === '交通費'
+          ? data.transportation_details
+          : data.expense_details
+      ) as unknown as T[];
 
-        const data = response.data;
-        setContainerData(data);
-
-        // カテゴリに応じて明細カードを配列化
-        const rawDetails = (
-          data.category === '交通費'
-            ? data.transportation_details
-            : data.expense_details
-        ) as unknown as T[];
-
-        setCards(rawDetails || []);
-        setInitialCards(rawDetails || []);
-        setDeletedDetailIds([]);
-      } catch (err) {
-        console.error('詳細データ取得エラー:', err);
-        if (isMounted) {
-          setError('データの取得に失敗しました。');
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchData();
-
-    return () => {
-      isMounted = false;
-    };
+      setCards(rawDetails || []);
+      setInitialCards(rawDetails || []);
+      setDeletedDetailIds([]);
+    } catch (err) {
+      console.error('詳細データ取得エラー:', err);
+      setError('データの取得に失敗しました。');
+    } finally {
+      setLoading(false);
+    }
   }, [containerId]);
+
+  // 1. データ取得処理
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   // 2. 変更有無（isDirty）の判定
   const isDirty = useMemo(() => {
@@ -95,7 +84,6 @@ export function useLogDetails<T extends BaseDetail>(containerId: string | undefi
     (updatedCard: T) => {
       // 編集可能判定（containerData と カード個別ステータスのチェック）
       if (!canEditCard(containerData?.status, updatedCard.status)) {
-        alert('このカードは承認済みのため編集できません。');
         return;
       }
 
@@ -112,8 +100,7 @@ export function useLogDetails<T extends BaseDetail>(containerId: string | undefi
       const targetCard = cards.find((c) => c.id === id);
       if (!targetCard) return;
 
-      if (!canEditCard(containerData?.status, targetCard.status)) {
-        alert('このカードは承認済みのため削除できません。');
+      if (!canDeleteCard(containerData?.status, targetCard.status)) {
         return;
       }
 
@@ -137,6 +124,7 @@ export function useLogDetails<T extends BaseDetail>(containerId: string | undefi
       // payloadBuilder を使用して送信データを整形
       const payload = buildUpdateApplicationPayload(
         containerId,
+        containerData.version,
         containerData.category,
         cards,
         deletedDetailIds
@@ -148,12 +136,16 @@ export function useLogDetails<T extends BaseDetail>(containerId: string | undefi
       return { success: response.success, isAllDeleted: payload.is_all_deleted };
     } catch (err) {
       console.error('送信エラー:', err);
-      alert('変更の保存に失敗しました。');
+
+      if (axios.isAxiosError(err) && err.response?.status === 409) {
+        await fetchData();
+      }
+
       return { success: false };
     } finally {
       setIsSubmitting(false);
     }
-  }, [containerId, isDirty, containerData, cards, deletedDetailIds]);
+  }, [containerId, isDirty, containerData, cards, deletedDetailIds, fetchData]);
 
   return {
     containerData,

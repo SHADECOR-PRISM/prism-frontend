@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import apiClient from '../../../api/axiosInstance.tsx';
 import type { LogItem } from '../components/container/logContainer.tsx';
 import type { BaseDetail, TransportDetail, GeneralExpenseDetail } from '../types/expenseTypes.tsx';
 
 // 取得する詳細データの型定義（ヘッダー + 各カード配列）
 export interface ContainerDetailData extends LogItem {
+  version: number;
   transportation_details?: TransportDetail[];
   expense_details?: GeneralExpenseDetail[];
 }
@@ -77,7 +79,7 @@ export function useApprovalDetails(containerId?: string) {
 
   // 4. バックエンドへ承認結果を一括送信
   const submitApproval = async () => {
-    if (!containerId || !isDirty || isSubmitting) return { success: false };
+    if (!containerId || !containerData || !isDirty || isSubmitting) return { success: false };
 
     try {
       setIsSubmitting(true);
@@ -85,6 +87,7 @@ export function useApprovalDetails(containerId?: string) {
       // バックエンドが期待するスキーマに合わせてペイロードを作成
       const payload = {
         container_id: containerId,
+        version: containerData.version,
         details: cards.map((card) => ({
           id: card.id,
           // 変更があればその値、なければ元のステータス、それもなければ 'pending'
@@ -95,9 +98,16 @@ export function useApprovalDetails(containerId?: string) {
       // 管理者用の承認エンドポイントへ送信
       await apiClient.put('/admin/accounting/requests/approval', payload);
 
+      await fetchDetail();
+
       return { success: true };
     } catch (err) {
       console.error('承認ステータス保存エラー:', err);
+
+      if (axios.isAxiosError(err) && err.response?.status === 409) {
+        await fetchDetail();
+      }
+
       return { success: false };
     } finally {
       setIsSubmitting(false);

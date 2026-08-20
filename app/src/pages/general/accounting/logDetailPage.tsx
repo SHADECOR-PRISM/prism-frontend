@@ -11,8 +11,10 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import CardStackLayout from '../../../components/layouts/cardStackLayout';
 import ContainerHeader from '../../../features/accounting/components/container/containerHeader';
+import StatusIcon from '../../../features/accounting/components/container/statusIcon';
 import { useLogDetails } from '../../../features/accounting/hooks/useLogDetails';
 import {
+  canDeleteCard,
   canEditCard,
   canEditContainer,
 } from '../../../features/accounting/utils/expensePolicy';
@@ -64,7 +66,6 @@ export default function LogDetailPage() {
   // 新規追加ボタン押下
   const handleAddCard = () => {
     if (!canEditContainer(containerData?.status)) {
-      alert('この申請は承認済みのため追加できません。');
       return;
     }
     setEditingData(null);
@@ -78,7 +79,6 @@ export default function LogDetailPage() {
     if (!targetCard) return;
 
     if (!canEditCard(containerData?.status, targetCard.status)) {
-      alert('このカードは承認済みのため編集できません。');
       return;
     }
 
@@ -137,11 +137,6 @@ export default function LogDetailPage() {
 
     const result = await submitChanges();
     if (result.success) {
-      if (result.isAllDeleted) {
-        alert('全カードが削除されたため、申請自体を削除しました。');
-      } else {
-        alert('変更を保存しました。');
-      }
       handleBackToLog();
     }
   };
@@ -203,6 +198,7 @@ export default function LogDetailPage() {
               cards.map((item) => {
                 const transportItem = item as unknown as TransportDetail;
                 const isEditable = canEditCard(containerData.status, transportItem.status);
+                const isDeletable = canDeleteCard(containerData.status, transportItem.status);
 
                 return (
                   <Box
@@ -219,10 +215,13 @@ export default function LogDetailPage() {
                     }}
                   >
                     <Box>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          利用日: {transportItem.usage_date}
-                        </Typography>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                          <StatusIcon status={transportItem.status} />
+                          <Typography variant="caption" color="text.secondary">
+                            利用日: {transportItem.usage_date}
+                          </Typography>
+                        </Box>
                         <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
                           {TRANSPORT_CATEGORY_LABELS[transportItem.category as TransportCategoryKey] || transportItem.category}
                         </Typography>
@@ -242,7 +241,7 @@ export default function LogDetailPage() {
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 1.5 }}>
                       <IconButton
                         onClick={() => deleteCard(transportItem.id)}
-                        disabled={!isEditable}
+                        disabled={!isDeletable}
                         sx={{
                           backgroundColor: '#FF7F7F',
                           color: '#FFFFFF',
@@ -280,6 +279,7 @@ export default function LogDetailPage() {
               cards.map((item) => {
                 const expenseItem = item as unknown as GeneralExpenseDetail;
                 const isEditable = canEditCard(containerData.status, expenseItem.status);
+                const isDeletable = canDeleteCard(containerData.status, expenseItem.status);
 
                 return (
                   <Box
@@ -296,10 +296,13 @@ export default function LogDetailPage() {
                     }}
                   >
                     <Box>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          利用日: {expenseItem.usage_date}
-                        </Typography>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                          <StatusIcon status={expenseItem.status} />
+                          <Typography variant="caption" color="text.secondary">
+                            利用日: {expenseItem.usage_date}
+                          </Typography>
+                        </Box>
                         <Typography variant="caption" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
                           {EXPENSE_CATEGORY_LABELS[expenseItem.category as ExpenseCategoryKey] || expenseItem.category}
                         </Typography>
@@ -318,7 +321,7 @@ export default function LogDetailPage() {
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 1.5 }}>
                       <IconButton
                         onClick={() => deleteCard(expenseItem.id)}
-                        disabled={!isEditable}
+                        disabled={!isDeletable}
                         sx={{
                           backgroundColor: '#FF7F7F',
                           color: '#FFFFFF',
