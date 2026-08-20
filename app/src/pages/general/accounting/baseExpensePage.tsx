@@ -17,7 +17,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import CardStackLayout from '../../../components/layouts/cardStackLayout';
 import { useCards, type BaseDetail } from '../../../features/accounting/hooks/useCards';
 import apiClient from '../../../api/axiosInstance';
-import { AxiosError } from 'axios'
 
 import { buildApplicationPayload } from '../../../features/accounting/utils/payloadBuilder';
 import { postApplicationRequest } from '../../../features/accounting/api/requestsApi';
@@ -114,19 +113,8 @@ export default function BaseExpenseLayout<T extends BaseDetail>({
       // 申請トップへ遷移
       navigate('/general/application');
 
-    } catch (error: unknown) { 
+    } catch (error: unknown) {
       console.error('送信エラー:', error);
-
-      let errorDetail = '通信エラーが発生しました';
-
-      // AxiosError かどうか判定して safely にプロパティを取得
-      if (error instanceof AxiosError && error.response?.data?.detail) {
-        errorDetail = error.response.data.detail;
-      } else if (error instanceof Error) {
-        errorDetail = error.message;
-      }
-
-      alert(`申請の送信に失敗しました:\n${errorDetail}`);
     } finally {
       setIsSubmitting(false);
     }

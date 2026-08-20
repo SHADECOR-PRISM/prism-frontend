@@ -3,11 +3,8 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import Box from '@mui/material/Box';
 
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import PendingIcon from '@mui/icons-material/Pending';
-import UnpublishedIcon from '@mui/icons-material/Unpublished';
-
 import BaseRegisterCard from './baseRegisterCard';
+import StatusIcon from '../container/statusIcon';
 
 import { type TransportDetail, TRANSPORT_CATEGORY_LABELS } from '../../types/expenseTypes';
 
@@ -17,20 +14,6 @@ interface TransportRegisterCardProps {
 }
 
 function TransportRegisterCard({ data, actionArea }: TransportRegisterCardProps) {
-  
-  // ステータスに応じたアイコンを返す関数
-  const getStatusIcon = () => {
-    switch (data.status) {
-      case 'approved':
-        return <CheckCircleIcon sx={{ color: 'success.main', fontSize: 20 }} />;
-      case 'rejected':
-        return <UnpublishedIcon sx={{ color: 'error.main', fontSize: 20 }} />;
-      case 'pending':
-      default:
-        return <PendingIcon sx={{ color: 'warning.main', fontSize: 20 }} />;
-    }
-  };
-
   const displayCategory = TRANSPORT_CATEGORY_LABELS[data.category] ?? data.category;
   
   return (
@@ -62,7 +45,7 @@ function TransportRegisterCard({ data, actionArea }: TransportRegisterCardProps)
             </Box>
             
             <Box sx={{ ml: 'auto', display: 'flex' }}>
-              {getStatusIcon()}
+              <StatusIcon status={data.status} />
             </Box>
           </Box>
 

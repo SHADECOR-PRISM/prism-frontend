@@ -105,10 +105,7 @@ export function useApprovalDetails(containerId?: string) {
       console.error('承認ステータス保存エラー:', err);
 
       if (axios.isAxiosError(err) && err.response?.status === 409) {
-        alert('他ユーザーによる更新と競合しました。最新データを再取得しました。内容を確認して再度保存してください。');
         await fetchDetail();
-      } else if (axios.isAxiosError(err) && err.response?.status === 403) {
-        alert('この操作を実行する権限がありません。');
       }
 
       return { success: false };

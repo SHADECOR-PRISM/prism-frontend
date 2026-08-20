@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import apiClient from '../../../api/axiosInstance';
 import { updateApplicationRequest } from '../api/requestsApi';
-import { canEditCard, isTempId } from '../utils/expensePolicy';
+import { canDeleteCard, canEditCard, isTempId } from '../utils/expensePolicy';
 import { buildUpdateApplicationPayload } from '../utils/payloadBuilder'; // ★ 追加
 import type { ContainerDetailData, BaseDetail } from '../types/expenseTypes';
 
@@ -84,7 +84,6 @@ export function useLogDetails<T extends BaseDetail>(containerId: string | undefi
     (updatedCard: T) => {
       // 編集可能判定（containerData と カード個別ステータスのチェック）
       if (!canEditCard(containerData?.status, updatedCard.status)) {
-        alert('このカードは承認済みのため編集できません。');
         return;
       }
 
@@ -101,8 +100,7 @@ export function useLogDetails<T extends BaseDetail>(containerId: string | undefi
       const targetCard = cards.find((c) => c.id === id);
       if (!targetCard) return;
 
-      if (!canEditCard(containerData?.status, targetCard.status)) {
-        alert('このカードは承認済みのため削除できません。');
+      if (!canDeleteCard(containerData?.status, targetCard.status)) {
         return;
       }
 
@@ -140,12 +138,7 @@ export function useLogDetails<T extends BaseDetail>(containerId: string | undefi
       console.error('送信エラー:', err);
 
       if (axios.isAxiosError(err) && err.response?.status === 409) {
-        alert('他ユーザーによる更新と競合しました。最新データを再取得しました。内容を確認して再度保存してください。');
         await fetchData();
-      } else if (axios.isAxiosError(err) && err.response?.status === 403) {
-        alert('この申請を更新する権限がありません。');
-      } else {
-        alert('変更の保存に失敗しました。');
       }
 
       return { success: false };
