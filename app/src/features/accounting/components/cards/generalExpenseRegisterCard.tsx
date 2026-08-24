@@ -56,7 +56,7 @@ function GeneralExpenseRegisterCard({ data, actionArea }: GeneralExpenseRegister
               overflow: 'hidden'
             }}
           >
-            {data.description} 
+            {data.remark}
           </Typography>
 
           <Typography variant="caption" sx={{ color: 'text.primary' }}>
