@@ -16,17 +16,13 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import CardStackLayout from '../../../components/layouts/cardStackLayout';
 import { useCards, type BaseDetail } from '../../../features/accounting/hooks/useCards';
-import apiClient from '../../../api/axiosInstance';
+import { getFastAPI } from '../../../api/generated/prismApi';
+import type { ProjectRead } from '../../../api/generated/prismApi.schemas';
 
 import { buildApplicationPayload } from '../../../features/accounting/utils/payloadBuilder';
 import { postApplicationRequest } from '../../../features/accounting/api/requestsApi';
 
-interface Project {
-  id: string;
-  name: string;
-  total_budget: number;
-  is_active: boolean;
-}
+type Project = ProjectRead;
 
 interface BaseExpenseLayoutProps<T extends BaseDetail> {
   categoryName: string;
@@ -59,8 +55,8 @@ export default function BaseExpenseLayout<T extends BaseDetail>({
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await apiClient.get<Project[]>('/projects');
-        setProjects(response.data);
+        const result = await getFastAPI().readProjects();
+        setProjects(result);
       } catch (error) {
         console.error('Failed to fetch projects:', error);
       }

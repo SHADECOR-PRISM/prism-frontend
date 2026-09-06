@@ -319,15 +319,15 @@ export interface UserProfile {
   current_date: string;
 }
 
-export type LoginLoginPostBody = { [key: string]: unknown };
+export type LoginBody = { [key: string]: unknown };
 
-export type GetContainerMeContainerMeGetParams = {
+export type GetContainerMeParams = {
 start: string;
 end: string;
 offset: number;
 };
 
-export type GetContainerAllAdminContainerAllGetParams = {
+export type GetAdminContainerAllParams = {
 start: string;
 end: string;
 offset?: number;
@@ -338,7 +338,7 @@ offset?: number;
 limit?: number;
 };
 
-export type GetAdminContainerByUserAdminContainerUserTargetUserIdGetParams = {
+export type GetAdminContainerByUserParams = {
 start: string;
 end: string;
 offset?: number;
@@ -349,7 +349,7 @@ offset?: number;
 limit?: number;
 };
 
-export type GetAdminAnalyticsSummaryAdminAnalyticsSummaryGetParams = {
+export type GetAdminAnalyticsSummaryParams = {
 start: string;
 end: string;
 };

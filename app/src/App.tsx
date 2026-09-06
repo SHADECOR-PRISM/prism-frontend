@@ -24,7 +24,8 @@ import PrintRemarkPage from './pages/admin/accounting/printRemarkPage';
 import PrintCompletePage from './pages/admin/accounting/printCompletePage';
 import AdminAnalytics from './pages/admin/accounting/analytics.tsx'
 
-import apiClient, {setAccessToken} from './api/axiosInstance.tsx'
+import {setAccessToken} from './api/axiosInstance.tsx'
+import { getFastAPI } from './api/generated/prismApi'
 import './App.css'
 
 
@@ -36,17 +37,17 @@ function App() {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const res = await apiClient.post('/refresh');
-        
-        const role = res.data?.role;
+        const token = await getFastAPI().authRefresh();
+
+        const role = token?.role;
         if (!role) {
           throw new Error("Missing role in refresh response");
         }
 
-        setAccessToken(res.data.access_token);
+        setAccessToken(token.access_token);
         setUserRole(role as 'admin' | 'general');
         setIsAuthenticated(true);
-      } 
+      }
       catch {
         setIsAuthenticated(false);
       } 

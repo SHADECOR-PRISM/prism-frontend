@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
-import apiClient from '../../../api/axiosInstance.tsx';
+import { getFastAPI } from '../../../api/generated/prismApi';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
@@ -65,19 +65,19 @@ function AdminApproval() {
     try {
       const currentOffset = logs.length;
       // 追加した /admin/container/all エンドポイントを呼び出し
-      const response = await apiClient.get<LogItem[]>(
-        `/admin/container/all?start=${start}&end=${end}&offset=${currentOffset}`
-      );
+      const response = await getFastAPI().getAdminContainerAll({
+        start,
+        end,
+        offset: currentOffset,
+      });
 
-    //   console.log('取得したコンテナデータ (payload):', response.data); //TODO 最後消す
-
-      if (!response.data || response.data.length === 0) {
+      if (!response || response.length === 0) {
         setHasMore(false);
       } else {
         setLogs((prev) => {
           const existingIds = new Set(prev.map((item) => item.id));
-          const uniqueNewItems = response.data.filter((item) => !existingIds.has(item.id));
-          
+          const uniqueNewItems = response.filter((item) => !existingIds.has(item.id));
+
           // 新しい要素が実質増えなかった場合は上限到達とみなす
           if (uniqueNewItems.length === 0) {
             setHasMore(false);

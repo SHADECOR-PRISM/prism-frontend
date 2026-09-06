@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import { isAxiosError } from 'axios';
-import apiClient from '../../../api/axiosInstance';
+import { getFastAPI } from '../../../api/generated/prismApi';
 import UserContainer, { type AdminUserItem } from '../../../components/elements/userContainer';
 
 export default function UserSelectPage() {
@@ -22,8 +22,13 @@ export default function UserSelectPage() {
       try {
         setIsLoading(true);
         setErrorMsg(null);
-        const res = await apiClient.get<AdminUserItem[]>('/admin/users');
-        setUsers(res.data || []);
+        const res = await getFastAPI().getAdminUsers();
+        setUsers((res || []).map((u): AdminUserItem => ({
+          id: u.id,
+          user_id: u.user_id,
+          name: u.name ?? '',
+          role: u.role,
+        })));
       } catch (err: unknown) {
         console.error('Fetch users error:', err);
         if (isAxiosError(err)) {

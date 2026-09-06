@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react';
-import apiClient from '../../../api/axiosInstance';
+import { getFastAPI } from '../../../api/generated/prismApi';
+import type { UserProfile } from '../../../api/generated/prismApi.schemas';
 
 import Typography from '@mui/material/Typography';
 import Box from "@mui/material/Box";
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider'
 import Container from '@mui/material/Container';
-
-interface UserProfile {
-  user_id: string;
-  user_name: string;
-  account_type: 'Admin' | 'General';
-  current_date: string;
-}
 
 function GeneralSetting() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -21,8 +15,8 @@ function GeneralSetting() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await apiClient.get('/users/me');
-        setProfile(response.data);
+        const profile = await getFastAPI().getMe();
+        setProfile(profile);
       } catch (error) {
         console.error('Failed to fetch profile:', error);
       } finally {

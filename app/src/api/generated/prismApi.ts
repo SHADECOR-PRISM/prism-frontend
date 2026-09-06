@@ -15,11 +15,11 @@ import type {
   BulkContainerDetailsRequest,
   Container,
   ContainerDetailResponse,
-  GetAdminAnalyticsSummaryAdminAnalyticsSummaryGetParams,
-  GetAdminContainerByUserAdminContainerUserTargetUserIdGetParams,
-  GetContainerAllAdminContainerAllGetParams,
-  GetContainerMeContainerMeGetParams,
-  LoginLoginPostBody,
+  GetAdminAnalyticsSummaryParams,
+  GetAdminContainerAllParams,
+  GetAdminContainerByUserParams,
+  GetContainerMeParams,
+  LoginBody,
   ProjectRead,
   Token,
   UserProfile
@@ -33,13 +33,13 @@ import { customInstance } from '../mutator/customInstance';
 /**
  * @summary Login
  */
-const loginLoginPost = (
-    loginLoginPostBody: LoginLoginPostBody,
+const login = (
+    loginBody: LoginBody,
  ) => {
       return customInstance<Token>(
       {url: `/login`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
-      data: loginLoginPostBody
+      data: loginBody
     },
       );
     }
@@ -47,7 +47,7 @@ const loginLoginPost = (
 /**
  * @summary Auth Refresh
  */
-const authRefreshRefreshPost = (
+const authRefresh = (
 
  ) => {
       return customInstance<Token>(
@@ -59,7 +59,7 @@ const authRefreshRefreshPost = (
 /**
  * @summary Logout
  */
-const logoutLogoutPost = (
+const logout = (
 
  ) => {
       return customInstance<unknown>(
@@ -72,7 +72,7 @@ const logoutLogoutPost = (
  * ログイン中のユーザープロフィール情報を取得するエンドポイント
  * @summary Get Me
  */
-const getMeUsersMeGet = (
+const getMe = (
 
  ) => {
       return customInstance<UserProfile>(
@@ -85,7 +85,7 @@ const getMeUsersMeGet = (
  * 【管理者用】登録ユーザー一覧を取得するエンドポイント
  * @summary Get Admin Users
  */
-const getAdminUsersAdminUsersGet = (
+const getAdminUsers = (
 
  ) => {
       return customInstance<AdminUserItem[]>(
@@ -97,7 +97,7 @@ const getAdminUsersAdminUsersGet = (
 /**
  * @summary Read Projects
  */
-const readProjectsProjectsGet = (
+const readProjects = (
 
  ) => {
       return customInstance<ProjectRead[]>(
@@ -109,8 +109,8 @@ const readProjectsProjectsGet = (
 /**
  * @summary Get Container Me
  */
-const getContainerMeContainerMeGet = (
-    params: GetContainerMeContainerMeGetParams,
+const getContainerMe = (
+    params: GetContainerMeParams,
  ) => {
       return customInstance<Container[]>(
       {url: `/container/me`, method: 'GET',
@@ -122,7 +122,7 @@ const getContainerMeContainerMeGet = (
 /**
  * @summary Update Existing Application
  */
-const updateExistingApplicationAccountingRequestsPut = (
+const updateApplication = (
     applicationUpdateRequest: ApplicationUpdateRequest,
  ) => {
       return customInstance<ApplicationUpdateResponse>(
@@ -136,7 +136,7 @@ const updateExistingApplicationAccountingRequestsPut = (
 /**
  * @summary Create New Application
  */
-const createNewApplicationAccountingRequestsPost = (
+const createApplication = (
     applicationCreateRequest: ApplicationCreateRequest,
  ) => {
       return customInstance<ApplicationCreateResponse>(
@@ -150,7 +150,7 @@ const createNewApplicationAccountingRequestsPost = (
 /**
  * @summary Get Container Detail
  */
-const getContainerDetailContainerContainerIdGet = (
+const getContainerDetail = (
     containerId: string,
  ) => {
       return customInstance<ContainerDetailResponse>(
@@ -162,8 +162,8 @@ const getContainerDetailContainerContainerIdGet = (
 /**
  * @summary Get Container All
  */
-const getContainerAllAdminContainerAllGet = (
-    params: GetContainerAllAdminContainerAllGetParams,
+const getAdminContainerAll = (
+    params: GetAdminContainerAllParams,
  ) => {
       return customInstance<Container[]>(
       {url: `/admin/container/all`, method: 'GET',
@@ -175,7 +175,7 @@ const getContainerAllAdminContainerAllGet = (
 /**
  * @summary Get Admin Container Detail
  */
-const getAdminContainerDetailAdminContainerContainerIdGet = (
+const getAdminContainerDetail = (
     containerId: string,
  ) => {
       return customInstance<ContainerDetailResponse>(
@@ -187,7 +187,7 @@ const getAdminContainerDetailAdminContainerContainerIdGet = (
 /**
  * @summary Update Application Approval Endpoint
  */
-const updateApplicationApprovalEndpointAdminAccountingRequestsApprovalPut = (
+const updateApplicationApproval = (
     applicationApprovalRequest: ApplicationApprovalRequest,
  ) => {
       return customInstance<ApplicationUpdateResponse>(
@@ -201,9 +201,9 @@ const updateApplicationApprovalEndpointAdminAccountingRequestsApprovalPut = (
 /**
  * @summary Get Admin Container By User
  */
-const getAdminContainerByUserAdminContainerUserTargetUserIdGet = (
+const getAdminContainerByUser = (
     targetUserId: string,
-    params: GetAdminContainerByUserAdminContainerUserTargetUserIdGetParams,
+    params: GetAdminContainerByUserParams,
  ) => {
       return customInstance<Container[]>(
       {url: `/admin/container/user/${targetUserId}`, method: 'GET',
@@ -215,8 +215,8 @@ const getAdminContainerByUserAdminContainerUserTargetUserIdGet = (
 /**
  * @summary Get Admin Analytics Summary
  */
-const getAdminAnalyticsSummaryAdminAnalyticsSummaryGet = (
-    params: GetAdminAnalyticsSummaryAdminAnalyticsSummaryGetParams,
+const getAdminAnalyticsSummary = (
+    params: GetAdminAnalyticsSummaryParams,
  ) => {
       return customInstance<AnalyticsSummaryResponse>(
       {url: `/admin/analytics/summary`, method: 'GET',
@@ -228,7 +228,7 @@ const getAdminAnalyticsSummaryAdminAnalyticsSummaryGet = (
 /**
  * @summary Get Admin Containers Bulk Details
  */
-const getAdminContainersBulkDetailsAdminContainersBulkDetailsPost = (
+const getAdminContainersBulkDetails = (
     bulkContainerDetailsRequest: BulkContainerDetailsRequest,
  ) => {
       return customInstance<ContainerDetailResponse[]>(
@@ -239,20 +239,20 @@ const getAdminContainersBulkDetailsAdminContainersBulkDetailsPost = (
       );
     }
 
-return {loginLoginPost,authRefreshRefreshPost,logoutLogoutPost,getMeUsersMeGet,getAdminUsersAdminUsersGet,readProjectsProjectsGet,getContainerMeContainerMeGet,updateExistingApplicationAccountingRequestsPut,createNewApplicationAccountingRequestsPost,getContainerDetailContainerContainerIdGet,getContainerAllAdminContainerAllGet,getAdminContainerDetailAdminContainerContainerIdGet,updateApplicationApprovalEndpointAdminAccountingRequestsApprovalPut,getAdminContainerByUserAdminContainerUserTargetUserIdGet,getAdminAnalyticsSummaryAdminAnalyticsSummaryGet,getAdminContainersBulkDetailsAdminContainersBulkDetailsPost}};
-export type LoginLoginPostResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['loginLoginPost']>>>
-export type AuthRefreshRefreshPostResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['authRefreshRefreshPost']>>>
-export type LogoutLogoutPostResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['logoutLogoutPost']>>>
-export type GetMeUsersMeGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getMeUsersMeGet']>>>
-export type GetAdminUsersAdminUsersGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getAdminUsersAdminUsersGet']>>>
-export type ReadProjectsProjectsGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['readProjectsProjectsGet']>>>
-export type GetContainerMeContainerMeGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getContainerMeContainerMeGet']>>>
-export type UpdateExistingApplicationAccountingRequestsPutResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['updateExistingApplicationAccountingRequestsPut']>>>
-export type CreateNewApplicationAccountingRequestsPostResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['createNewApplicationAccountingRequestsPost']>>>
-export type GetContainerDetailContainerContainerIdGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getContainerDetailContainerContainerIdGet']>>>
-export type GetContainerAllAdminContainerAllGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getContainerAllAdminContainerAllGet']>>>
-export type GetAdminContainerDetailAdminContainerContainerIdGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getAdminContainerDetailAdminContainerContainerIdGet']>>>
-export type UpdateApplicationApprovalEndpointAdminAccountingRequestsApprovalPutResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['updateApplicationApprovalEndpointAdminAccountingRequestsApprovalPut']>>>
-export type GetAdminContainerByUserAdminContainerUserTargetUserIdGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getAdminContainerByUserAdminContainerUserTargetUserIdGet']>>>
-export type GetAdminAnalyticsSummaryAdminAnalyticsSummaryGetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getAdminAnalyticsSummaryAdminAnalyticsSummaryGet']>>>
-export type GetAdminContainersBulkDetailsAdminContainersBulkDetailsPostResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getAdminContainersBulkDetailsAdminContainersBulkDetailsPost']>>>
+return {login,authRefresh,logout,getMe,getAdminUsers,readProjects,getContainerMe,updateApplication,createApplication,getContainerDetail,getAdminContainerAll,getAdminContainerDetail,updateApplicationApproval,getAdminContainerByUser,getAdminAnalyticsSummary,getAdminContainersBulkDetails}};
+export type LoginResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['login']>>>
+export type AuthRefreshResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['authRefresh']>>>
+export type LogoutResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['logout']>>>
+export type GetMeResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getMe']>>>
+export type GetAdminUsersResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getAdminUsers']>>>
+export type ReadProjectsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['readProjects']>>>
+export type GetContainerMeResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getContainerMe']>>>
+export type UpdateApplicationResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['updateApplication']>>>
+export type CreateApplicationResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['createApplication']>>>
+export type GetContainerDetailResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getContainerDetail']>>>
+export type GetAdminContainerAllResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getAdminContainerAll']>>>
+export type GetAdminContainerDetailResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getAdminContainerDetail']>>>
+export type UpdateApplicationApprovalResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['updateApplicationApproval']>>>
+export type GetAdminContainerByUserResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getAdminContainerByUser']>>>
+export type GetAdminAnalyticsSummaryResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getAdminAnalyticsSummary']>>>
+export type GetAdminContainersBulkDetailsResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getFastAPI>['getAdminContainersBulkDetails']>>>
