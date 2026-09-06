@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Dayjs } from 'dayjs';
-import apiClient from '../../../api/axiosInstance';
+import { getFastAPI } from '../../../api/generated/prismApi';
 
+// 表示コンポーネント側は必須フィールドを前提にしているため、
+// バックエンドのOpenAPIスキーマ（各カウントがoptional）から取得した値をここで正規化する
 export interface StatusCounts {
   approved: number;
   pending: number;
@@ -36,14 +38,25 @@ export function useAnalyticsSummary(fromDate: Dayjs | null, toDate: Dayjs | null
       const startIso = fromDate.startOf('day').toISOString();
       const endIso = toDate.endOf('day').toISOString();
 
-      const response = await apiClient.get<AnalyticsSummary>('/admin/analytics/summary', {
-        params: {
-          start: startIso,
-          end: endIso,
-        },
+      const result = await getFastAPI().getAdminAnalyticsSummary({
+        start: startIso,
+        end: endIso,
       });
 
-      setData(response.data);
+      // バックエンドのカウント値はoptionalなため、表示側の必須フィールドへ正規化する
+      setData({
+        status_counts: {
+          approved: result.status_counts.approved ?? 0,
+          pending: result.status_counts.pending ?? 0,
+          rejected: result.status_counts.rejected ?? 0,
+          total: result.status_counts.total ?? 0,
+        },
+        expenses: {
+          transport: result.expenses.transport ?? 0,
+          general: result.expenses.general ?? 0,
+          total: result.expenses.total ?? 0,
+        },
+      });
     } catch (err) {
       console.error('アナリティクス集計データ取得エラー:', err);
       setError('集計データの取得に失敗しました。');

@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
-import apiClient from '../../../api/axiosInstance';
+import { getFastAPI } from '../../../api/generated/prismApi';
+import type { ContainerDetailResponse } from '../../../api/generated/prismApi.schemas';
 import { updateApplicationRequest } from '../api/requestsApi';
 import { canDeleteCard, canEditCard, isTempId } from '../utils/expensePolicy';
 import { buildUpdateApplicationPayload } from '../utils/payloadBuilder'; // ★ 追加
-import type { ContainerDetailData, BaseDetail } from '../types/expenseTypes';
+import type { BaseDetail } from '../types/expenseTypes';
 
 export function useLogDetails<T extends BaseDetail>(containerId: string | undefined) {
-  const [containerData, setContainerData] = useState<ContainerDetailData | null>(null);
+  const [containerData, setContainerData] = useState<ContainerDetailResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,8 +30,7 @@ export function useLogDetails<T extends BaseDetail>(containerId: string | undefi
     setLoading(true);
     setError(null);
     try {
-      const response = await apiClient.get<ContainerDetailData>(`/container/${containerId}`);
-      const data = response.data;
+      const data = await getFastAPI().getContainerDetail(containerId);
       setContainerData(data);
 
       // カテゴリに応じて明細カードを配列化

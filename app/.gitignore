@@ -23,5 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
-# test dir 
+# test dir
 **/test/
+
+# Secrets and environment variables
+.env
+.env.local
+.env.*.local

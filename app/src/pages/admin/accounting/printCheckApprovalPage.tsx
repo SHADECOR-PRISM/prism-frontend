@@ -8,7 +8,7 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import LinearProgress from '@mui/material/LinearProgress';
 import Alert from '@mui/material/Alert';
-import apiClient from '../../../api/axiosInstance';
+import { getFastAPI } from '../../../api/generated/prismApi';
 import { type AdminUserItem } from '../../../components/elements/userContainer';
 import UserContainerHeader from '../../../features/accounting/components/print/userContainerHeader';
 import LogContainer, { type LogItem } from '../../../features/accounting/components/container/logContainer';
@@ -60,14 +60,12 @@ export default function PrintCheckApprovalPage() {
 
       try {
         // limit=1000, offset=0 を指定して1発取得
-        const endpoint = isPersonal
-          ? `/admin/container/user/${selectedUser!.id}?start=${start}&end=${end}&offset=0&limit=1000`
-          : `/admin/container/all?start=${start}&end=${end}&offset=0&limit=1000`;
-
-        const response = await apiClient.get<LogItem[]>(endpoint);
+        const response = isPersonal
+          ? await getFastAPI().getAdminContainerByUser(selectedUser!.id, { start, end, offset: 0, limit: 1000 })
+          : await getFastAPI().getAdminContainerAll({ start, end, offset: 0, limit: 1000 });
 
         if (isMounted) {
-          setLogs(response.data || []);
+          setLogs(response || []);
         }
       } catch (err) {
         console.error('伝票ログ一括取得エラー:', err);

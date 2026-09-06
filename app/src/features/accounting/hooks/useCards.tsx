@@ -12,7 +12,6 @@ export function useCards<T extends BaseDetail>(initialData: T[] = []) {
 
   // カード削除処理
   const deleteCard = (id: string) => {
-    console.log(`[Delete] ${id}`);
     setCards((prev) => prev.filter(card => card.id !== id));
   };
 
@@ -23,12 +22,10 @@ export function useCards<T extends BaseDetail>(initialData: T[] = []) {
 
       if (isExisting) {
         // 既存なら上書き
-        console.log(`[Update] ${cardData.id}`);
         return prev.map((card) => (card.id === cardData.id ? { ...card, ...cardData } : card));
       } else {
         // 新規なら追加
         if (prev.length >= 10) return prev; // 枚数制限
-        console.log(`[Add] ${cardData.id}`);
         return [...prev, cardData];
       }
     });

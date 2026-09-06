@@ -1,10 +1,10 @@
 import dayjs from 'dayjs';
 import type { ExpenseReportData, TransportReportItem, ExpenseReportItem } from '../types/reportTypes';
 import {
-  type ContainerDetailData,
   TRANSPORT_CATEGORY_LABELS,
   EXPENSE_CATEGORY_LABELS,
 } from '../types/expenseTypes';
+import type { ContainerDetailResponse } from '../../../api/generated/prismApi.schemas';
 
 interface FormatReportParams {
   applicant: {
@@ -15,7 +15,7 @@ interface FormatReportParams {
     start: dayjs.Dayjs;
     end: dayjs.Dayjs;
   };
-  containers: ContainerDetailData[];
+  containers: ContainerDetailResponse[];
   notes?: string;
 }
 
