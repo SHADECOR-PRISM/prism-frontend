@@ -102,9 +102,7 @@ export default function BaseExpenseLayout<T extends BaseDetail>({
     try {
       // ペイロード整形して保存
       const payload = buildApplicationPayload(categoryName, selectedProjectId, cards);
-      const res = await postApplicationRequest(payload);
-
-      console.log('登録成功:', res);
+      await postApplicationRequest(payload);
 
       // 申請トップへ遷移
       navigate('/general/application');
