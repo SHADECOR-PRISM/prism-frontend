@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import apiClient, { setAccessToken } from '../api/axiosInstance';
+import { setAccessToken } from '../api/axiosInstance';
+import { getFastAPI } from '../api/generated/prismApi';
 
 import Typography from '@mui/material/Typography';
 import Box from "@mui/material/Box";
@@ -30,18 +31,18 @@ function Login({ onLoginSuccess }: LoginProps) {
     setErrorMessage("");
     
     try {
-      const auth_response = await apiClient.post("/login", {
+      const auth_response = await getFastAPI().login({
         userId: userId,
         password: password,
       });
 
       // roleが欠損した場合エラー
-      const role = auth_response.data?.role;
+      const role = auth_response?.role;
       if (!role) {
         throw new Error("Missing role in server response");
       }
 
-      setAccessToken(auth_response.data.access_token);
+      setAccessToken(auth_response.access_token);
       onLoginSuccess(role as 'admin' | 'general');
 
     } catch {

@@ -4,7 +4,7 @@ import Toolbar from '@mui/material/Toolbar'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Icon from '../../assets/hero.png'
-import apiClient from '../../api/axiosInstance'
+import { getFastAPI } from '../../api/generated/prismApi'
 
 function Header() {
   const [currentDate, setCurrentDate] = useState('----/--/--')
@@ -14,10 +14,10 @@ function Header() {
   useEffect(() => {
     ;(async () => {
       try {
-        const response = await apiClient.get('/users/me')
-        setCurrentDate(response.data.current_date)
-        setUserName(response.data.user_name)
-        setAccountType(response.data.account_type ?? 'General')
+        const profile = await getFastAPI().getMe()
+        setCurrentDate(profile.current_date)
+        setUserName(profile.user_name)
+        setAccountType(profile.account_type ?? 'General')
       } catch {
         console.error('Unable to load user information')
       }

@@ -1,18 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import apiClient from '../../../api/axiosInstance.tsx';
-import type { LogItem } from '../components/container/logContainer.tsx';
-import type { BaseDetail, TransportDetail, GeneralExpenseDetail } from '../types/expenseTypes.tsx';
-
-// 取得する詳細データの型定義（ヘッダー + 各カード配列）
-export interface ContainerDetailData extends LogItem {
-  version: number;
-  transportation_details?: TransportDetail[];
-  expense_details?: GeneralExpenseDetail[];
-}
+import { getFastAPI } from '../../../api/generated/prismApi';
+import type { ContainerDetailResponse } from '../../../api/generated/prismApi.schemas';
+import type { BaseDetail } from '../types/expenseTypes.tsx';
 
 export function useApprovalDetails(containerId?: string) {
-  const [containerData, setContainerData] = useState<ContainerDetailData | null>(null);
+  const [containerData, setContainerData] = useState<ContainerDetailResponse | null>(null);
   const [cards, setCards] = useState<BaseDetail[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,8 +22,7 @@ export function useApprovalDetails(containerId?: string) {
       setLoading(true);
       setError(null);
 
-      const response = await apiClient.get<ContainerDetailData>(`/admin/container/${containerId}`);
-      const data = response.data;
+      const data = await getFastAPI().getAdminContainerDetail(containerId);
 
       setContainerData(data);
       
@@ -96,7 +88,7 @@ export function useApprovalDetails(containerId?: string) {
       };
 
       // 管理者用の承認エンドポイントへ送信
-      await apiClient.put('/admin/accounting/requests/approval', payload);
+      await getFastAPI().updateApplicationApproval(payload);
 
       await fetchDetail();
 

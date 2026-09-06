@@ -13,11 +13,10 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import TableViewIcon from '@mui/icons-material/TableView';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 
-import apiClient from '../../../api/axiosInstance';
+import { getFastAPI } from '../../../api/generated/prismApi';
 import { type AdminUserItem } from '../../../components/elements/userContainer';
 import UserContainerHeader from '../../../features/accounting/components/print/userContainerHeader';
 import { type LogItem } from '../../../features/accounting/components/container/logContainer';
-import { type ContainerDetailData } from '../../../features/accounting/types/expenseTypes';
 import { type ExpenseReportData } from '../../../features/accounting/types/reportTypes';
 import { formatToReportData } from '../../../features/accounting/utils/reportDataFormatter';
 
@@ -63,7 +62,7 @@ export default function PrintCompletePage() {
 
     async function fetchAllDetails() {
       const containers = state?.selectedContainers || [];
-      const containerIds = containers.map((c) => c.id).filter(Boolean);
+      const containerIds = containers.map((c) => String(c.id)).filter(Boolean);
 
       // 個人モード時は selectedUser が必須、全体モード時はコンテナ件数のみ検証
       if ((isPersonal && !selectedUser) || containerIds.length === 0) {
@@ -77,12 +76,9 @@ export default function PrintCompletePage() {
         setError(null);
 
         // 複数コンテナの明細を一括取得（1回のリクエスト）
-        const response = await apiClient.post<ContainerDetailData[]>(
-          '/admin/containers/bulk-details',
-          { container_ids: containerIds }
-        );
-
-        const detailedContainers = response.data;
+        const detailedContainers = await getFastAPI().getAdminContainersBulkDetails({
+          container_ids: containerIds,
+        });
 
         // 申請者情報の表示名分岐
         const applicantName = isPersonal

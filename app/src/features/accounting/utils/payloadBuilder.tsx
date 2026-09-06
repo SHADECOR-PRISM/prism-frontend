@@ -3,15 +3,18 @@ import {
   type TransportDetail,
   type GeneralExpenseDetail,
   type BaseDetail,
+  type TransportCategoryKey,
+  type ExpenseCategoryKey,
 } from '../types/expenseTypes';
 
 // ==========================================
 // APIリクエスト（送信用ペロード）の型定義
+// バックエンドのOpenAPIスキーマ（ApplicationCreateRequest）と整合する形に絞り込む
 // ==========================================
 export interface TransportDetailPayload {
   id: null;
   usage_date: string;
-  category: string;
+  category: TransportCategoryKey;
   departure: string | null;
   arrival: string | null;
   is_round_trip: boolean;
@@ -21,14 +24,14 @@ export interface TransportDetailPayload {
 export interface ExpenseDetailPayload {
   id: null;
   usage_date: string;
-  category: string;
+  category: ExpenseCategoryKey;
   remark: string | null;
   amount: number;
 }
 
 export interface ApplicationHeaderPayload {
   project_id: string;
-  type: string;
+  type: 'expense' | 'income';
   category: string;
 }
 
