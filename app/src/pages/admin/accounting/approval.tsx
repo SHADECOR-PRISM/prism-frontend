@@ -123,7 +123,7 @@ function AdminApproval() {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100vh',
+        height: '100%',
         width: '100%',
         overflow: 'hidden',
         backgroundColor: '#F9F9F9',
