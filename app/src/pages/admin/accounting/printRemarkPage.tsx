@@ -60,7 +60,7 @@ export default function PrintRemarkPage() {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100vh',
+        height: '100%',
         width: '100%',
         bgcolor: '#FFFFFF',
         overflow: 'hidden',
