@@ -7,7 +7,7 @@ export default function BlankLayout() {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100dvh',
+        height: '100%',
       }}
     >
       <Box
