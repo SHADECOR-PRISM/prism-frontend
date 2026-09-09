@@ -12,6 +12,8 @@ const resolveCardStatus = (
 
 /**
  * 明細（カード）が編集可能かを判定する
+ * - コンテナが approved: 編集不可
+ * - 明細が pending または rejected（却下明細の修正・再申請）: 編集可
  * @param headerStatus コンテナ（申請全体）のステータス
  * @param cardStatusOrDetail 明細個別のステータス文字列、または BaseDetail オブジェクト
  */
@@ -19,15 +21,15 @@ export const canEditCard = (
   headerStatus?: string,
   cardStatusOrDetail?: string | BaseDetail
 ): boolean => {
-  if (headerStatus !== 'pending') return false;
+  if (headerStatus === 'approved') return false;
 
-  return resolveCardStatus(cardStatusOrDetail) === 'pending';
+  const cardStatus = resolveCardStatus(cardStatusOrDetail);
+  return cardStatus === 'pending' || cardStatus === 'rejected';
 };
 
 /**
  * 明細（カード）が削除可能かを判定する
  * - コンテナが rejected: 全明細を削除可
- * - 明細が rejected: その明細は削除のみ可（編集不可）
  * - それ以外: 編集可能な明細と同じ条件
  */
 export const canDeleteCard = (

@@ -19,6 +19,7 @@ export interface GeneralExpenseModalData {
   amount: number;
   status: 'pending' | 'approved' | 'rejected';
   created_at: string | null;
+  comment?: string | null;
 }
 
 interface GeneralExpenseRegisterModalProps {
@@ -37,6 +38,7 @@ const defaultData: GeneralExpenseModalData = {
   amount: 0,
   status: 'pending',
   created_at: null,
+  comment: null,
 };
 
 // タッチ状態の型定義
@@ -223,6 +225,19 @@ export default function GeneralExpenseRegisterModal({
             helperText={touched.amount ? getAmountError() : ''}
             slotProps={{ htmlInput: { inputMode: 'numeric', pattern: '[0-9]*' } }}
           />
+
+          {/* 管理者からのコメント（読み取り専用） */}
+          {formData.comment && (
+            <TextField
+              label="管理者からのコメント（前回の却下理由）"
+              fullWidth
+              multiline
+              rows={2}
+              value={formData.comment}
+              slotProps={{ input: { readOnly: true } }}
+              sx={{ bgcolor: '#F5F5F5' }}
+            />
+          )}
         </Stack>
       </DialogContent>
 

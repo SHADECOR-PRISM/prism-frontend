@@ -15,6 +15,9 @@ export function useApprovalDetails(containerId?: string) {
   // 例: { "card-uuid-1": "approved", "card-uuid-2": "rejected" }
   const [modifiedStatuses, setModifiedStatuses] = useState<Record<string, 'pending' | 'approved' | 'rejected'>>({});
 
+  // 変更されたカードのコメントだけを保持する
+  const [modifiedComments, setModifiedComments] = useState<Record<string, string>>({});
+
   // 1. 管理者用APIから詳細データを取得
   const fetchDetail = useCallback(async () => {
     if (!containerId) return;
@@ -33,6 +36,7 @@ export function useApprovalDetails(containerId?: string) {
 
       setCards(detailItems as BaseDetail[]);
       setModifiedStatuses({}); // 状態をリセット
+      setModifiedComments({});
     } catch (err) {
       console.error('管理者詳細データ取得エラー:', err);
       setError('詳細データの取得に失敗しました。');
@@ -66,8 +70,18 @@ export function useApprovalDetails(containerId?: string) {
     }));
   };
 
-  // 3. 画面上に変更（未保存のステータス）があるか判定
-  const isDirty = Object.keys(modifiedStatuses).length > 0;
+  // 2.5. コメント編集時の更新関数
+  const updateCardComment = (cardId: string, newComment: string) => {
+    setModifiedComments((prev) => ({
+      ...prev,
+      [cardId]: newComment,
+    }));
+  };
+
+  // 3. 画面上に変更（未保存のステータス・コメント）があるか判定
+  const isDirty =
+    Object.keys(modifiedStatuses).length > 0 ||
+    Object.keys(modifiedComments).length > 0;
 
   // 4. バックエンドへ承認結果を一括送信
   const submitApproval = async () => {
@@ -84,6 +98,7 @@ export function useApprovalDetails(containerId?: string) {
           id: card.id,
           // 変更があればその値、なければ元のステータス、それもなければ 'pending'
           status: modifiedStatuses[card.id] ?? card.status ?? 'pending',
+          comment: modifiedComments[card.id] ?? card.comment ?? null,
         })),
       };
 
@@ -114,7 +129,9 @@ export function useApprovalDetails(containerId?: string) {
     isDirty,
     isSubmitting,
     modifiedStatuses,
+    modifiedComments,
     updateCardStatus,
+    updateCardComment,
     submitApproval,
     refresh: fetchDetail, // 必要に応じて再取得できる関数もエクスポート
   };

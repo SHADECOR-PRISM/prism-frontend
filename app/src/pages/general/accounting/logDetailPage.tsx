@@ -232,6 +232,26 @@ export default function LogDetailPage() {
                           ({transportItem.is_round_trip ? '往復' : '片道'})
                         </Typography>
                       </Typography>
+                      {transportItem.comment && (
+                        <Box sx={{ mb: 1 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#F44336' }}>
+                            前回のコメント
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.primary"
+                            sx={{
+                              display: '-webkit-box',
+                              WebkitBoxOrient: 'vertical',
+                              WebkitLineClamp: 2,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                            }}
+                          >
+                            {transportItem.comment}
+                          </Typography>
+                        </Box>
+                      )}
                       <Typography variant="h6" align="right" sx={{ fontWeight: 'bold', color: '#2C3E50' }}>
                         ¥{transportItem.amount.toLocaleString()}
                       </Typography>
@@ -311,6 +331,26 @@ export default function LogDetailPage() {
                         <Typography variant="body2" color="text.primary" sx={{ mb: 1, whiteSpace: 'pre-wrap' }}>
                           {expenseItem.remark}
                         </Typography>
+                      )}
+                      {expenseItem.comment && (
+                        <Box sx={{ mb: 1 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#F44336' }}>
+                            前回のコメント
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.primary"
+                            sx={{
+                              display: '-webkit-box',
+                              WebkitBoxOrient: 'vertical',
+                              WebkitLineClamp: 2,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                            }}
+                          >
+                            {expenseItem.comment}
+                          </Typography>
+                        </Box>
                       )}
                       <Typography variant="h6" align="right" sx={{ fontWeight: 'bold', color: '#2C3E50' }}>
                         ¥{expenseItem.amount.toLocaleString()}
