@@ -28,25 +28,11 @@ export const canEditCard = (
 };
 
 /**
- * 明細（カード）が削除可能かを判定する
- * - コンテナが rejected: 全明細を削除可
- * - それ以外: 編集可能な明細と同じ条件
+ * 明細（カード）が削除可能かを判定する。
+ * 現状では編集可能な条件と完全に一致する（承認済みの明細は、
+ * コンテナ全体のステータスに関わらず削除できない）ため canEditCard に委譲する。
  */
-export const canDeleteCard = (
-  headerStatus?: string,
-  cardStatusOrDetail?: string | BaseDetail
-): boolean => {
-  if (headerStatus === 'approved') return false;
-  if (headerStatus === 'rejected') return true;
-  if (
-    headerStatus === 'pending' &&
-    resolveCardStatus(cardStatusOrDetail) === 'rejected'
-  ) {
-    return true;
-  }
-
-  return canEditCard(headerStatus, cardStatusOrDetail);
-};
+export const canDeleteCard = canEditCard;
 
 /**
  * 申請全体（コンテナ）が編集・新規追加可能な状態か判定する
