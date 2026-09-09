@@ -6,6 +6,8 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
+import Select, { type SelectChangeEvent } from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import DateRangeSelector, { type DateRange } from '../../../components/elements/dateRangeSelector.tsx';
 import LogContainer, { type LogItem } from '../../../features/accounting/components/container/logContainer.tsx';
 
@@ -20,6 +22,8 @@ function GeneralLog() {
   const [logs, setLogs] = useState<LogItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [status, setStatus] = useState('');
+  const [userName, setUserName] = useState('');
 
   const loaderRef = useRef<HTMLDivElement | null>(null);
   const isFetchingRef = useRef(false);
@@ -51,6 +55,13 @@ function GeneralLog() {
     isFetchingRef.current = false;
   };
 
+  const handleStatusChange = (event: SelectChangeEvent) => {
+    setStatus(event.target.value);
+    setLogs([]);
+    setHasMore(isValidRange);
+    isFetchingRef.current = false;
+  };
+
   const loadLogs = useCallback(async () => {
     if (isFetchingRef.current || !hasMore || !isValidRange || !dateRange.fromDate || !dateRange.toDate) return;
 
@@ -66,6 +77,7 @@ function GeneralLog() {
         start,
         end,
         offset: currentOffset,
+        status: status || undefined,
       });
 
       if (!response || response.length === 0) {
@@ -84,7 +96,20 @@ function GeneralLog() {
       setLoading(false);
       isFetchingRef.current = false;
     }
-  }, [hasMore, isValidRange, dateRange, logs.length]);
+  }, [hasMore, isValidRange, dateRange, logs.length, status]);
+
+  // 表示用のログインユーザー名を取得（マウント時に一度だけ）
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profile = await getFastAPI().getMe();
+        setUserName(profile?.user_name || '');
+      } catch (error) {
+        console.error('プロフィール取得エラー:', error);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   useEffect(() => {
     if (!hasMore || !isValidRange) return;
@@ -125,7 +150,6 @@ function GeneralLog() {
           p: 2,
           flexShrink: 0,
           backgroundColor: '#FFFFFF',
-          borderBottom: '1px solid #E0E0E0',
           display: 'flex',
           justifyContent: 'flex-end',
         }}
@@ -135,13 +159,41 @@ function GeneralLog() {
         </Container>
       </Box>
 
+      {/* 1.5. ステータス絞り込みエリア（日付選択エリアの下部） */}
+      <Box
+        sx={{
+          px: 2,
+          pb: 2,
+          flexShrink: 0,
+          backgroundColor: '#FFFFFF',
+          borderBottom: '1px solid #E0E0E0',
+          display: 'flex',
+          justifyContent: 'flex-end',
+        }}
+      >
+        <Container maxWidth="md" disableGutters sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Select
+            size="small"
+            displayEmpty
+            value={status}
+            onChange={handleStatusChange}
+            sx={{ minWidth: 140, bgcolor: '#FFFFFF' }}
+          >
+            <MenuItem value="">Status</MenuItem>
+            <MenuItem value="pending">Pending</MenuItem>
+            <MenuItem value="approved">Approved</MenuItem>
+            <MenuItem value="rejected">Rejected</MenuItem>
+          </Select>
+        </Container>
+      </Box>
+
       {/* 2. ログリスト領域（中央スクロールエリア） */}
       <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto', bgcolor: '#FFFFFF', px: 2, py: 1 }}>
         <Container maxWidth="md" disableGutters sx={{ display: 'flex', flexDirection: 'column' }}>
           {logs.map((item, index) => (
             <LogContainer
               key={item.id ? `${item.id}-${index}` : index}
-              data={item}
+              data={{ ...item, user_id: userName || item.user_id }}
               onClick={() => handleContainerClick(item)} // ★ 修正箇所: item オブジェクトを渡す
             />
           ))}
