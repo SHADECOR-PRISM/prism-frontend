@@ -325,6 +325,7 @@ export type GetContainerMeParams = {
 start: string;
 end: string;
 offset: number;
+status?: string | null;
 };
 
 export type GetAdminContainerAllParams = {
@@ -336,6 +337,8 @@ offset?: number;
  * @maximum 1000
  */
 limit?: number;
+status?: string | null;
+user_id?: string | null;
 };
 
 export type GetAdminContainerByUserParams = {
