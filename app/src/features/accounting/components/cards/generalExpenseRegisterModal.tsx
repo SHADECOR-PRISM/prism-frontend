@@ -232,7 +232,7 @@ export default function GeneralExpenseRegisterModal({
               label="管理者からのコメント（前回の却下理由）"
               fullWidth
               multiline
-              rows={2}
+              minRows={2}
               value={formData.comment}
               slotProps={{ input: { readOnly: true } }}
               sx={{ bgcolor: '#F5F5F5' }}
