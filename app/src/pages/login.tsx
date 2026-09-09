@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { setAccessToken } from '../api/axiosInstance';
 import { getFastAPI } from '../api/generated/prismApi';
 
@@ -12,6 +13,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import LoginIcon from "@mui/icons-material/Login";
 import PrismLogo from '../assets/hero.png';
+import termsOfUse from '../assets/terms-of-use/terms-of-use.md?raw';
 
 interface LoginProps {
   onLoginSuccess: (role: 'admin' | 'general') => void;
@@ -177,8 +179,8 @@ function Login({ onLoginSuccess }: LoginProps) {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: '60%',
-            height: '70%',
+            width: '88%',
+            height: '80%',
             bgcolor: 'background.paper',
             boxShadow: 24,
             borderRadius: 1,
@@ -199,11 +201,24 @@ function Login({ onLoginSuccess }: LoginProps) {
             <CloseIcon />
           </IconButton>
           <Typography id="modal-modal-title" variant="h6" component="h2">
-            Text in a modal
+            利用規約
           </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-          </Typography>
+          <Box
+            id="modal-modal-description"
+            sx={{
+              mt: 2,
+              textAlign: 'left',
+              '& h1': { fontSize: '1.15rem', fontWeight: 'bold', mt: 0, mb: 1.5 },
+              '& h3': { fontSize: '1rem', fontWeight: 'bold', mt: 2.5, mb: 1 },
+              '& p': { fontSize: '0.875rem', lineHeight: 1.8, mb: 1.5 },
+              '& ul, & ol': { pl: 3, mb: 1.5 },
+              '& li': { fontSize: '0.875rem', lineHeight: 1.8, mb: 0.5 },
+              '& hr': { my: 2, border: 'none', borderTop: '1px solid', borderColor: 'divider' },
+              '& strong': { fontWeight: 'bold' },
+            }}
+          >
+            <ReactMarkdown>{termsOfUse}</ReactMarkdown>
+          </Box>
         </Box>
       </Modal>
     </Box>
