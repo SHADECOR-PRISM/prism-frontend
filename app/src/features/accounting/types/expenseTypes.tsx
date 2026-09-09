@@ -6,6 +6,7 @@ export interface BaseDetail {
   usage_date: string;
   amount: number;
   status: 'pending' | 'approved' | 'rejected';
+  comment?: string | null;
 }
 
 // ==========================================

@@ -124,12 +124,23 @@ export const buildUpdateApplicationPayload = (
   version: number,
   categoryName: string, // "交通費" または "経費"
   cards: BaseDetail[],
+  initialCards: BaseDetail[],
   deletedDetailIds: string[]
 ): UpdateApplicationPayload => {
   const isTransport = categoryName === '交通費';
   const isAllDeleted = cards.length === 0;
 
-  const updatedDetails: UpdateDetailPayload[] = cards.map((card) => {
+  // 承認済みの兄弟カードを誤って巻き込まないよう、変更のあったカードのみを送信する
+  const initialById = new Map(initialCards.map((c) => [c.id, c]));
+  const changedCards = cards.filter((card) => {
+    const isTemp = card.id.startsWith('temp_'); // 新規追加カードは常に対象
+    if (isTemp) return true;
+    const original = initialById.get(card.id);
+    if (!original) return true;
+    return JSON.stringify(card) !== JSON.stringify(original);
+  });
+
+  const updatedDetails: UpdateDetailPayload[] = changedCards.map((card) => {
     // 一時ID (temp_ 始まり) の場合は新規追加分なので id を null に変換
     const isTemp = card.id.startsWith('temp_');
     const targetId = isTemp ? null : card.id;

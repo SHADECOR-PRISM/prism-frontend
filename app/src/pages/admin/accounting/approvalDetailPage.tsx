@@ -6,6 +6,7 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import TextField from '@mui/material/TextField';
 
 import CardStackLayout from '../../../components/layouts/cardStackLayout';
 import ContainerHeader from '../../../features/accounting/components/container/containerHeader';
@@ -33,7 +34,9 @@ export default function ApprovalDetailPage() {
     isDirty,
     isSubmitting,
     modifiedStatuses,
+    modifiedComments,
     updateCardStatus,
+    updateCardComment,
     submitApproval,
   } = useApprovalDetails(id);
 
@@ -180,6 +183,23 @@ export default function ApprovalDetailPage() {
                         </ToggleButton>
                       </ToggleButtonGroup>
                     </Box>
+
+                    {/* 管理者用：コメント入力欄（却下理由など） */}
+                    <TextField
+                      label="コメント（却下理由など）"
+                      fullWidth
+                      multiline
+                      size="small"
+                      value={modifiedComments[transportItem.id] ?? transportItem.comment ?? ''}
+                      onChange={(e) => {
+                        if (e.target.value.length <= 100) {
+                          updateCardComment(transportItem.id, e.target.value);
+                        }
+                      }}
+                      helperText={`${(modifiedComments[transportItem.id] ?? transportItem.comment ?? '').length}/100文字`}
+                      sx={{ mt: 1.5 }}
+                      slotProps={{ htmlInput: { maxLength: 100 } }}
+                    />
                   </Box>
                 );
               })}
@@ -264,6 +284,23 @@ export default function ApprovalDetailPage() {
                         </ToggleButton>
                       </ToggleButtonGroup>
                     </Box>
+
+                    {/* 管理者用：コメント入力欄（却下理由など） */}
+                    <TextField
+                      label="コメント（却下理由など）"
+                      fullWidth
+                      multiline
+                      size="small"
+                      value={modifiedComments[expenseItem.id] ?? expenseItem.comment ?? ''}
+                      onChange={(e) => {
+                        if (e.target.value.length <= 100) {
+                          updateCardComment(expenseItem.id, e.target.value);
+                        }
+                      }}
+                      helperText={`${(modifiedComments[expenseItem.id] ?? expenseItem.comment ?? '').length}/100文字`}
+                      sx={{ mt: 1.5 }}
+                      slotProps={{ htmlInput: { maxLength: 100 } }}
+                    />
                   </Box>
                 );
               })}
