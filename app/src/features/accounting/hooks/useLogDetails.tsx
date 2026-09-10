@@ -52,7 +52,10 @@ export function useLogDetails<T extends BaseDetail>(containerId: string | undefi
   }, [containerId]);
 
   // 1. データ取得処理
+  // fetchData は submitChanges 内の409競合時の再取得（142行目）でも再利用する共有関数のため、
+  // ここでの直接呼び出しを維持する（setLoading等のリセット処理を2箇所に重複させないため）
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
   }, [fetchData]);
 
