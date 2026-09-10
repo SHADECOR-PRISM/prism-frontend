@@ -9,6 +9,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 const SLIDE_PATH_PATTERNS = [
   '/general/log/:id',
   '/admin/approval/:id',
+  '/admin/print/personal',
   '/admin/print/setting',
 ];
 
