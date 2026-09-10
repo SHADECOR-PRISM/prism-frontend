@@ -161,6 +161,7 @@ export interface ApplicationUpdateResponse {
 
 export interface BulkContainerDetailsRequest {
   container_ids: string[];
+  target_user_id?: string | null;
 }
 
 export type ContainerStatus = typeof ContainerStatus[keyof typeof ContainerStatus];
