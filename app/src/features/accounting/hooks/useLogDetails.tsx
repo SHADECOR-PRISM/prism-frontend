@@ -127,6 +127,7 @@ export function useLogDetails<T extends BaseDetail>(containerId: string | undefi
         containerData.version,
         containerData.category,
         cards,
+        initialCards,
         deletedDetailIds
       );
 
@@ -145,7 +146,7 @@ export function useLogDetails<T extends BaseDetail>(containerId: string | undefi
     } finally {
       setIsSubmitting(false);
     }
-  }, [containerId, isDirty, containerData, cards, deletedDetailIds, fetchData]);
+  }, [containerId, isDirty, containerData, cards, initialCards, deletedDetailIds, fetchData]);
 
   return {
     containerData,

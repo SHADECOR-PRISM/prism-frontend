@@ -1,13 +1,16 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
 import { type AdminUserItem } from '../../../../components/elements/userContainer';
 
 interface UserContainerHeaderProps {
   data?: AdminUserItem | null;
+  onBack?: () => void;
 }
 
-export default function UserContainerHeader({ data }: UserContainerHeaderProps) {
+export default function UserContainerHeader({ data, onBack }: UserContainerHeaderProps) {
   if (!data) return null;
 
   return (
@@ -23,6 +26,13 @@ export default function UserContainerHeader({ data }: UserContainerHeaderProps) 
         borderBottom: '1px solid #EEEEEE',
       }}
     >
+      {/* 0. 戻るボタン（onBack が渡された場合のみ表示） */}
+      {onBack && (
+        <IconButton onClick={onBack} size="small" sx={{ color: '#000000', mr: 1 }}>
+          <ArrowBackIcon fontSize="small" />
+        </IconButton>
+      )}
+
       {/* 1. 左側: ユーザーアイコン */}
       <Box
         sx={{

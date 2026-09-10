@@ -19,7 +19,7 @@ export default function StatusIcon({ status }: StatusIconProps) {
       case 'pending':
       case '申請中':
       default:
-        return '#ed6c02'; // MUI color="warning" (落ち着いたオレンジ)
+        return '#9e9e9e'; // ニュートラルなグレー（視認性改善のためオレンジから変更）
     }
   };
 

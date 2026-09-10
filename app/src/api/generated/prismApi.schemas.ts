@@ -41,6 +41,7 @@ export const CardStatusUpdateItemStatus = {
 export interface CardStatusUpdateItem {
   id: string;
   status: CardStatusUpdateItemStatus;
+  comment?: string | null;
 }
 
 export interface ApplicationApprovalRequest {
@@ -224,6 +225,8 @@ export interface TransportDetailResponse {
   amount: number;
   id: string;
   status: TransportDetailResponseStatus;
+  comment?: string | null;
+  updated_at?: string | null;
 }
 
 export type ExpenseDetailResponseCategory = typeof ExpenseDetailResponseCategory[keyof typeof ExpenseDetailResponseCategory];
@@ -260,6 +263,8 @@ export interface ExpenseDetailResponse {
   amount: number;
   id: string;
   status: ExpenseDetailResponseStatus;
+  comment?: string | null;
+  updated_at?: string | null;
 }
 
 export interface ContainerDetailResponse {
@@ -272,6 +277,7 @@ export interface ContainerDetailResponse {
   status: ContainerDetailResponseStatus;
   total_amount: number;
   version: number;
+  updated_at?: string | null;
   transportation_details?: TransportDetailResponse[];
   expense_details?: ExpenseDetailResponse[];
 }
@@ -325,6 +331,7 @@ export type GetContainerMeParams = {
 start: string;
 end: string;
 offset: number;
+status?: string | null;
 };
 
 export type GetAdminContainerAllParams = {
@@ -336,6 +343,8 @@ offset?: number;
  * @maximum 1000
  */
 limit?: number;
+status?: string | null;
+user_id?: string | null;
 };
 
 export type GetAdminContainerByUserParams = {

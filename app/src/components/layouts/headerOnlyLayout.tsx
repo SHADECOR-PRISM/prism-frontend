@@ -1,8 +1,11 @@
 import Box from '@mui/material/Box'
-import { Outlet } from 'react-router-dom'
-import Header from './header'
+import IconButton from '@mui/material/IconButton'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import { Outlet, useNavigate } from 'react-router-dom'
 
 export default function HeaderOnlyLayout() {
+  const navigate = useNavigate()
+
   return (
     <Box
       sx={{
@@ -11,7 +14,22 @@ export default function HeaderOnlyLayout() {
         height: '100%',
       }}
     >
-      <Header />
+      <Box
+        sx={{
+          height: 60,
+          minHeight: '60px',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          px: 1,
+          backgroundColor: '#FFFFFF',
+          borderBottom: '1px solid #E0E0E0',
+        }}
+      >
+        <IconButton onClick={() => navigate(-1)} sx={{ color: '#000000' }}>
+          <ArrowBackIcon />
+        </IconButton>
+      </Box>
 
       <Box
         component="main"

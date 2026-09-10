@@ -21,6 +21,7 @@ export interface TransportModalData {
   amount: number;
   status: 'pending' | 'approved' | 'rejected';
   created_at: string | null;
+  comment?: string | null;
 }
 
 interface TransportRegisterModalProps {
@@ -41,6 +42,7 @@ const defaultData: TransportModalData = {
   amount: 0,
   status: 'pending',
   created_at: null,
+  comment: null,
 };
 
 // タッチ状態の型定義
@@ -231,6 +233,19 @@ export default function TransportRegisterModal({
             helperText={touched.amount ? getAmountError() : ''}
             slotProps={{ htmlInput: { inputMode: 'numeric', pattern: '[0-9]*' } }}
           />
+
+          {/* 管理者からのコメント（読み取り専用） */}
+          {formData.comment && (
+            <TextField
+              label="管理者からのコメント（前回の却下理由）"
+              fullWidth
+              multiline
+              minRows={2}
+              value={formData.comment}
+              slotProps={{ input: { readOnly: true } }}
+              sx={{ bgcolor: '#F5F5F5' }}
+            />
+          )}
         </Stack>
       </DialogContent>
 
