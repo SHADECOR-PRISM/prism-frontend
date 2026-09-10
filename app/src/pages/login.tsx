@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import { setAccessToken } from '../api/axiosInstance';
 import { getFastAPI } from '../api/generated/prismApi';
@@ -47,8 +48,31 @@ function Login({ onLoginSuccess }: LoginProps) {
       setAccessToken(auth_response.access_token);
       onLoginSuccess(role as 'admin' | 'general');
 
-    } catch {
-      // 401 403 やレスポンスのrole欠損もすべてここで検知
+    } catch (err) {
+      // ロック中（ブルートフォース対策、423）
+      if (axios.isAxiosError(err) && err.response?.status === 423) {
+        const lockedUntil = err.response.data?.detail?.locked_until as string | undefined;
+        const minutesLeft = lockedUntil
+          ? Math.max(1, Math.ceil((new Date(lockedUntil).getTime() - Date.now()) / 60000))
+          : null;
+        setErrorMessage(
+          minutesLeft
+            ? `アカウントが一時的にロックされています。約${minutesLeft}分後に再度お試しください。`
+            : 'アカウントが一時的にロックされています。しばらくしてから再度お試しください。'
+        );
+        return;
+      }
+
+      // 認証失敗（401）: 残り試行回数が少ない場合は警告を出す
+      if (axios.isAxiosError(err) && err.response?.status === 401) {
+        const remaining = err.response.data?.detail?.remaining_attempts as number | undefined;
+        if (typeof remaining === 'number' && remaining > 0 && remaining <= 2) {
+          setErrorMessage(`Incorrect ID or password（あと${remaining}回間違えると10分間ログインできなくなります）`);
+          return;
+        }
+      }
+
+      // それ以外（403やレスポンスのrole欠損等）もすべてここで検知
       setErrorMessage("Incorrect ID or password");
     }
   };
