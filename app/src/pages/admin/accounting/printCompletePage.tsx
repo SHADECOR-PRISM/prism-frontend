@@ -80,6 +80,7 @@ export default function PrintCompletePage() {
         // 複数コンテナの明細を一括取得（1回のリクエスト）
         const detailedContainers = await getFastAPI().getAdminContainersBulkDetails({
           container_ids: containerIds,
+          target_user_id: isPersonal ? selectedUser?.id : undefined,
         });
 
         // 申請者情報の表示名分岐
