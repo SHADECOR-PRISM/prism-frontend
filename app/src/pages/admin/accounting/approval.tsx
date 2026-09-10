@@ -205,7 +205,7 @@ function AdminApproval() {
             displayEmpty
             value={userId}
             onChange={handleUserChange}
-            sx={{ minWidth: 160, bgcolor: '#FFFFFF' }}
+            sx={{ minWidth: 140, bgcolor: '#FFFFFF' }}
           >
             <MenuItem value="">User</MenuItem>
             {users.map((user) => (
