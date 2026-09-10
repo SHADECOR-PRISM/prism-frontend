@@ -173,10 +173,10 @@ function App() {
           {/* フッター無しレイアウトへのアクセス */}
           <Route element={<HeaderOnlyLayout />}>
 
-            {/* 個人明細出力 Step 1 (ユーザー選択ページ) */}
+            {/* 個人明細出力 Step 1 (ユーザー選択ページ、handle={{ slide: true }} で横スライド有効化) */}
             <Route path="/admin/print/personal" element={
               isAdmin ? <UserSelectPage /> : (isAuthenticated ? <Navigate to={defaultTarget} replace /> : <Navigate to="/login" replace />)
-            } />
+            } handle={{ slide: true }} />
 
           </Route>
 

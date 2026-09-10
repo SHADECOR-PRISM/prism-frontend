@@ -5,6 +5,8 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LinearProgress from '@mui/material/LinearProgress';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
@@ -74,20 +76,22 @@ export default function PrintSettingPage() {
         <Box sx={{ width: '100%', flexShrink: 0 }}>
           <Container maxWidth="xs" disableGutters>
             {isPersonal ? (
-              <UserContainerHeader data={selectedUser} />
+              <UserContainerHeader data={selectedUser} onBack={() => navigate(-1)} />
             ) : (
               <Box
                 sx={{
-                  py: 2,
-                  px: 3,
+                  py: 1.5,
+                  pl: 1,
+                  pr: 3,
                   borderBottom: '1px solid #EBEBEB',
                   display: 'flex',
                   alignItems: 'center',
+                  gap: 1,
                 }}
               >
-                <Typography sx={{ fontWeight: 'bold', fontSize: '18px', color: '#000000' }}>
-                  全体支出明細出力
-                </Typography>
+                <IconButton onClick={() => navigate(-1)} size="small" sx={{ color: '#000000' }}>
+                  <ArrowBackIcon fontSize="small" />
+                </IconButton>
               </Box>
             )}
           </Container>
