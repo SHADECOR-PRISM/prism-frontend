@@ -24,6 +24,7 @@ function GeneralLog() {
   const [hasMore, setHasMore] = useState(true);
   const [status, setStatus] = useState('');
   const [userName, setUserName] = useState('');
+  const [hasRejected, setHasRejected] = useState(false);
 
   const loaderRef = useRef<HTMLDivElement | null>(null);
   const isFetchingRef = useRef(false);
@@ -111,6 +112,24 @@ function GeneralLog() {
     fetchProfile();
   }, []);
 
+  // 差し戻し(rejected)の有無を確認（日付フィルタとは独立、全期間対象、マウント時に一度だけ）
+  useEffect(() => {
+    const checkRejected = async () => {
+      try {
+        const rejectedItems = await getFastAPI().getContainerMe({
+          start: dayjs('2000-01-01').toISOString(),
+          end: dayjs().add(1, 'day').startOf('day').toISOString(),
+          offset: 0,
+          status: 'rejected',
+        });
+        setHasRejected(!!rejectedItems && rejectedItems.length > 0);
+      } catch (error) {
+        console.error('差し戻し確認エラー:', error);
+      }
+    };
+    checkRejected();
+  }, []);
+
   useEffect(() => {
     if (!hasMore || !isValidRange) return;
 
@@ -147,7 +166,9 @@ function GeneralLog() {
       {/* 1. 日付選択エリア（上部固定） */}
       <Box
         sx={{
-          p: 2,
+          px: 2,
+          pt: 2,
+          pb: 1,
           flexShrink: 0,
           backgroundColor: '#FFFFFF',
           display: 'flex',
@@ -163,12 +184,13 @@ function GeneralLog() {
       <Box
         sx={{
           px: 2,
-          pb: 2,
+          pb: 1,
           flexShrink: 0,
           backgroundColor: '#FFFFFF',
           borderBottom: '1px solid #E0E0E0',
           display: 'flex',
-          justifyContent: 'flex-end',
+          flexDirection: 'column', 
+          alignItems: 'flex-end',  
         }}
       >
         <Container maxWidth="md" disableGutters sx={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -185,6 +207,16 @@ function GeneralLog() {
             <MenuItem value="rejected">Rejected</MenuItem>
           </Select>
         </Container>
+      
+        {/* 1.6. 差し戻し警告（1件でもrejectedがあれば表示） */}
+        {hasRejected && (
+          <Typography
+            sx={{ fontSize: '12px', color: 'error.main', px: 0, pb: 0, flexShrink: 0, textAlign: 'right', backgroundColor: '#FFFFFF' }}
+          >
+            差し戻された申請があります
+          </Typography>
+        )}
+
       </Box>
 
       {/* 2. ログリスト領域（中央スクロールエリア） */}
