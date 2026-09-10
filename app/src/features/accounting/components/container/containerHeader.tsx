@@ -32,7 +32,7 @@ export default function ContainerHeader({ containerId, data }: ContainerHeaderPr
       case 'pending':
       case '申請中':
       default:
-        return <Chip label="申請中" color="warning" size="small" sx={{ height: 20, fontSize: '11px', fontWeight: 'bold' }} />;
+        return <Chip label="申請中" size="small" sx={{ height: 20, fontSize: '11px', fontWeight: 'bold', bgcolor: '#f3f4f6', color: '#374151' }} />;
     }
   };
 
