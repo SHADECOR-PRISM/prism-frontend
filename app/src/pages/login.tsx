@@ -13,7 +13,7 @@ import Modal from '@mui/material/Modal';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import LoginIcon from "@mui/icons-material/Login";
-import PrismLogo from '../assets/hero.png';
+import PrismLogo from '../assets/favicon.svg';
 import termsOfUse from '../assets/terms-of-use/terms-of-use.md?raw';
 
 interface LoginProps {
