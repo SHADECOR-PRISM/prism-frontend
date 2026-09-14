@@ -116,12 +116,15 @@ export default function StatusPieChartCard({
         sx={{
           width: '100%',
           display: 'flex',
+          flexWrap: 'wrap',
           alignItems: 'center',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
+          rowGap: 2,
+          columnGap: 3,
         }}
       >
-        {/* ドーナツチャート */}
-        <Box sx={{ width: 170, height: 170, position: 'relative' }}>
+        {/* ドーナツチャート（横幅に関わらず常に170x170で表示、崩れ・見切れを防止） */}
+        <Box sx={{ width: 170, height: 170, position: 'relative', flexShrink: 0 }}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

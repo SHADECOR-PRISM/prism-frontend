@@ -10,6 +10,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CircularProgress from '@mui/material/CircularProgress';
 import LinearProgress from '@mui/material/LinearProgress';
 import Alert from '@mui/material/Alert';
+import Select, { type SelectChangeEvent } from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import { getFastAPI } from '../../../api/generated/prismApi';
 import { type AdminUserItem } from '../../../components/elements/userContainer';
 import UserContainerHeader from '../../../features/accounting/components/print/userContainerHeader';
@@ -39,6 +41,7 @@ export default function PrintCheckApprovalPage() {
   const [logs, setLogs] = useState<LogItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState('');
 
   // 1回のリクエストで期間内の全件を一括取得（limit=1000）
   useEffect(() => {
@@ -108,6 +111,16 @@ export default function PrintCheckApprovalPage() {
 
   // 未承認伝票の存在チェック
   const hasUnapproved = logs.length > approvedLogs.length;
+
+  // ステータス絞り込み後の表示用リスト（Next対象の承認済み判定には影響しない）
+  const filteredLogs = useMemo(() => {
+    if (!statusFilter) return logs;
+    return logs.filter((item) => (item.status || '').toLowerCase() === statusFilter);
+  }, [logs, statusFilter]);
+
+  const handleStatusFilterChange = (event: SelectChangeEvent) => {
+    setStatusFilter(event.target.value);
+  };
 
   // Nextボタンの活性条件: 読み込み中以外、エラーなし、承認済み伝票が1件以上あること
   const isNextDisabled = loading || !!error || approvedLogs.length === 0;
@@ -184,6 +197,21 @@ export default function PrintCheckApprovalPage() {
 
       {/* エラー / ステータス案内メッセージ */}
       <Box sx={{ px: 3, pb: 1, flexShrink: 0 }}>
+        <Container maxWidth="xs" disableGutters sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+          <Select
+            size="small"
+            displayEmpty
+            value={statusFilter}
+            onChange={handleStatusFilterChange}
+            sx={{ minWidth: 140, bgcolor: '#FFFFFF' }}
+          >
+            <MenuItem value="">Status</MenuItem>
+            <MenuItem value="pending">Pending</MenuItem>
+            <MenuItem value="approved">Approved</MenuItem>
+            <MenuItem value="rejected">Rejected</MenuItem>
+          </Select>
+        </Container>
+
         <Container maxWidth="xs" disableGutters>
           {error && (
             <Alert severity="error" sx={{ fontSize: '12px', py: 0.5 }}>
@@ -239,8 +267,12 @@ export default function PrintCheckApprovalPage() {
             <Typography sx={{ fontSize: '14px', color: 'grey', my: 6, textAlign: 'center' }}>
               対象期間内の申請データがありません
             </Typography>
+          ) : filteredLogs.length === 0 ? (
+            <Typography sx={{ fontSize: '14px', color: 'grey', my: 6, textAlign: 'center' }}>
+              該当するステータスの伝票がありません
+            </Typography>
           ) : (
-            logs.map((item, index) => (
+            filteredLogs.map((item, index) => (
               <Box
                 key={item.id ? `select-log-${item.id}` : `select-log-idx-${index}`}
                 sx={{ width: '100%', boxSizing: 'border-box' }}
