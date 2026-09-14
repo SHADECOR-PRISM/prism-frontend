@@ -3,7 +3,7 @@ import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import Icon from '../../assets/hero.png'
+import Icon from '../../assets/logo.svg'
 import { getFastAPI } from '../../api/generated/prismApi'
 
 function Header() {

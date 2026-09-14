@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #3c8eca;
+      }
+
+      .cls-2 {
+        stroke-linecap: round;
+      }
+
+      .cls-2, .cls-3 {
+        fill: none;
+        stroke: #fff;
+        stroke-linejoin: bevel;
+        stroke-width: 6px;
+      }
+
+      .cls-4 {
+        fill: #2c6996;
+      }
+
+      .cls-3 {
+        stroke-linecap: square;
+      }
+    </style>
+  </defs>
+  <g id="shapes">
+    <polygon class="cls-1" points="251.31 79.46 34.05 401.96 251.29 253.25 251.31 79.46"/>
+    <polygon class="cls-1" points="256.6 82.82 478.12 402.36 319.02 298.94 256.6 82.82"/>
+    <polygon class="cls-1" points="254.23 363.84 474.55 407.33 254.12 435.63 254.23 363.84"/>
+    <polygon class="cls-4" points="254.23 85.18 316.41 300.66 476.41 404.7 254.37 360.89 254.23 85.18"/>
+    <polygon class="cls-4" points="251.25 256.78 35.3 404.7 251.31 361.03 251.25 256.78"/>
+    <polygon class="cls-4" points="251.31 435.63 251.21 364.03 37.28 407.3 251.31 435.63"/>
+  </g>
+  <g id="lines">
+    <polygon class="cls-3" points="252.72 74.68 28.46 407.62 252.72 437.32 483.54 407.62 252.72 74.68"/>
+    <polyline class="cls-3" points="480.59 405.71 317.79 299.84 253.16 76.22"/>
+    <polyline class="cls-3" points="33.55 406.59 253.16 362.14 480.59 407.04"/>
+    <line class="cls-2" x1="252.24" y1="254.33" x2="31.22" y2="405.74"/>
+    <line class="cls-3" x1="252.72" y1="78.87" x2="252.72" y2="436.29"/>
+  </g>
+</svg>
