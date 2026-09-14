@@ -58,7 +58,7 @@ function Header() {
               fontSize: 20,
             }}
           >
-            App name
+            PRISM
           </Typography>
         </Box>
 
