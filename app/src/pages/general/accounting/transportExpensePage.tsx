@@ -21,6 +21,7 @@ function TransportModalAdapter({ open, initialData, onApply, onClose }: Transpor
       departure: data.departure,
       arrival: data.arrival,
       is_round_trip: data.is_round_trip,
+      remark: data.remark,
       amount: data.amount,
       status: data.status || 'pending',
     });

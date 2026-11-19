@@ -17,6 +17,7 @@ export interface TransportDetail extends BaseDetail {
   departure?: string | null;            // 出発地
   arrival?: string | null;              // 到着地
   is_round_trip: boolean;               // 往復かどうか
+  remark?: string | null;               // 備考（申請者が記入。最大100文字）
   created_at?: string | null;
 }
 

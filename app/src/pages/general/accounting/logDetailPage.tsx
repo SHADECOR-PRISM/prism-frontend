@@ -95,6 +95,7 @@ export default function LogDetailPage() {
       departure: data.departure,
       arrival: data.arrival,
       is_round_trip: data.is_round_trip,
+      remark: data.remark,
       amount: data.amount,
       status: data.status || 'pending',
     };
@@ -232,6 +233,11 @@ export default function LogDetailPage() {
                           ({transportItem.is_round_trip ? '往復' : '片道'})
                         </Typography>
                       </Typography>
+                      {transportItem.remark && (
+                        <Typography variant="body2" color="text.primary" sx={{ mb: 1, whiteSpace: 'pre-wrap' }}>
+                          {transportItem.remark}
+                        </Typography>
+                      )}
                       {transportItem.comment && (
                         <Box sx={{ mb: 1 }}>
                           <Typography variant="caption" sx={{ fontWeight: 'bold', color: '#F44336' }}>

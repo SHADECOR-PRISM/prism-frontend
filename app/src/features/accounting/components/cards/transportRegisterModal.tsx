@@ -18,6 +18,7 @@ export interface TransportModalData {
   departure: string | null;
   arrival: string | null;
   is_round_trip: boolean;
+  remark?: string | null;
   amount: number;
   status: 'pending' | 'approved' | 'rejected';
   created_at: string | null;
@@ -39,6 +40,7 @@ const defaultData: TransportModalData = {
   departure: null,
   arrival: null,
   is_round_trip: true,
+  remark: null,
   amount: 0,
   status: 'pending',
   created_at: null,
@@ -220,6 +222,26 @@ export default function TransportRegisterModal({
             onBlur={() => handleBlur('arrival')}
             error={!!touched.arrival && !!getArrivalError()}
             helperText={touched.arrival ? getArrivalError() : ''}
+          />
+
+          {/* 備考（任意） */}
+          <TextField
+            label="備考"
+            fullWidth
+            multiline
+            rows={2}
+            placeholder="必要に応じて自由に記入して下さい"
+            value={formData.remark || ''}
+            onChange={(e) => {
+              if (e.target.value.length <= 100) {
+                handleChange('remark', e.target.value);
+              }
+            }}
+            helperText={`${(formData.remark || '').length}/100文字`}
+            slotProps={{
+              inputLabel: { shrink: true },
+              htmlInput: { maxLength: 100 }
+            }}
           />
 
           {/* 金額 */}

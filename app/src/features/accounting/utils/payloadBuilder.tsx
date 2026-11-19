@@ -18,6 +18,7 @@ export interface TransportDetailPayload {
   departure: string | null;
   arrival: string | null;
   is_round_trip: boolean;
+  remark: string | null;
   amount: number;
 }
 
@@ -69,6 +70,7 @@ export const buildApplicationPayload = (
         departure: c.departure || null,
         arrival: c.arrival || null,
         is_round_trip: c.is_round_trip ?? true,
+        remark: c.remark || null,
         amount: Number(c.amount),
       })),
     };
@@ -154,6 +156,7 @@ export const buildUpdateApplicationPayload = (
         departure: c.departure || null,
         arrival: c.arrival || null,
         is_round_trip: c.is_round_trip ?? true,
+        remark: c.remark || null,
         amount: Number(c.amount),
       };
     } else {

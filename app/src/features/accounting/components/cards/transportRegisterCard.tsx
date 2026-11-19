@@ -53,6 +53,21 @@ function TransportRegisterCard({ data, actionArea }: TransportRegisterCardProps)
             {data.departure}駅 - {data.arrival}
           </Typography>
 
+          {data.remark && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{
+                display: '-webkit-box',
+                WebkitLineClamp: 1,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden'
+              }}
+            >
+              {data.remark}
+            </Typography>
+          )}
+
           <Typography variant="caption" sx={{ color: 'text.primary' }}>
             {data.amount.toLocaleString()}円
           </Typography>
