@@ -12,6 +12,9 @@ import MenuItem from '@mui/material/MenuItem';
 import DateRangeSelector, { type DateRange } from '../../../components/elements/dateRangeSelector.tsx';
 import LogContainer, { type LogItem } from '../../../features/accounting/components/container/logContainer.tsx';
 
+// 画面遷移でコンポーネントが破棄されても絞り込み状態を保持する（メモリ上のみ。リロード・ログアウトで消える）
+const savedFilter = { status: '', userId: '' };
+
 function AdminApproval() {
   const navigate = useNavigate();
 
@@ -23,8 +26,8 @@ function AdminApproval() {
   const [logs, setLogs] = useState<LogItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [status, setStatus] = useState('');
-  const [userId, setUserId] = useState('');
+  const [status, setStatus] = useState(savedFilter.status);
+  const [userId, setUserId] = useState(savedFilter.userId);
   const [users, setUsers] = useState<AdminUserItem[]>([]);
 
   // 公開ユーザーコード（usr00001 等）→ 氏名 の変換マップ
@@ -66,6 +69,7 @@ function AdminApproval() {
 
   // ステータス選択時のリセット処理
   const handleStatusChange = (event: SelectChangeEvent) => {
+    savedFilter.status = event.target.value;
     setStatus(event.target.value);
     setLogs([]);
     setHasMore(isValidRange);
@@ -74,6 +78,7 @@ function AdminApproval() {
 
   // ユーザー選択時のリセット処理
   const handleUserChange = (event: SelectChangeEvent) => {
+    savedFilter.userId = event.target.value;
     setUserId(event.target.value);
     setLogs([]);
     setHasMore(isValidRange);
