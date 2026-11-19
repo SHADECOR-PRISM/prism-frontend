@@ -229,13 +229,13 @@ function AdminApproval() {
           justifyContent: 'flex-end',
         }}
       >
-        <Container maxWidth="md" disableGutters sx={{ display: 'flex', justifyContent: 'flex-end', flexWrap: 'wrap', gap: 1.5 }}>
+        <Container maxWidth="md" disableGutters sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
           <Select
             size="small"
             displayEmpty
             value={userId}
             onChange={handleUserChange}
-            sx={{ minWidth: 140, bgcolor: '#FFFFFF' }}
+            sx={{ flex: '1 1 0', minWidth: 0, maxWidth: 160, bgcolor: '#FFFFFF' }}
           >
             <MenuItem value="">User</MenuItem>
             {users.map((user) => (
@@ -250,7 +250,7 @@ function AdminApproval() {
             displayEmpty
             value={projectId}
             onChange={handleProjectChange}
-            sx={{ minWidth: 140, bgcolor: '#FFFFFF' }}
+            sx={{ flex: '1 1 0', minWidth: 0, maxWidth: 160, bgcolor: '#FFFFFF' }}
           >
             <MenuItem value="">Project</MenuItem>
             {projects.map((project) => (
@@ -265,7 +265,7 @@ function AdminApproval() {
             displayEmpty
             value={status}
             onChange={handleStatusChange}
-            sx={{ minWidth: 140, bgcolor: '#FFFFFF' }}
+            sx={{ flex: '1 1 0', minWidth: 0, maxWidth: 160, bgcolor: '#FFFFFF' }}
           >
             <MenuItem value="">Status</MenuItem>
             <MenuItem value="pending">Pending</MenuItem>
