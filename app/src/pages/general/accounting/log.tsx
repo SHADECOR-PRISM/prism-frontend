@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { getFastAPI } from '../../../api/generated/prismApi';
+import type { ProjectRead } from '../../../api/generated/prismApi.schemas';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
@@ -12,7 +13,7 @@ import DateRangeSelector, { type DateRange } from '../../../components/elements/
 import LogContainer, { type LogItem } from '../../../features/accounting/components/container/logContainer.tsx';
 
 // 画面遷移でコンポーネントが破棄されても絞り込み状態を保持する（メモリ上のみ。リロード・ログアウトで消える）
-const savedFilter = { status: '' };
+const savedFilter = { status: '', projectId: '' };
 
 function GeneralLog() {
   const navigate = useNavigate();
@@ -26,6 +27,8 @@ function GeneralLog() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [status, setStatus] = useState(savedFilter.status);
+  const [projectId, setProjectId] = useState(savedFilter.projectId);
+  const [projects, setProjects] = useState<ProjectRead[]>([]);
   const [userName, setUserName] = useState('');
   const [hasRejected, setHasRejected] = useState(false);
 
@@ -67,6 +70,14 @@ function GeneralLog() {
     isFetchingRef.current = false;
   };
 
+  const handleProjectChange = (event: SelectChangeEvent) => {
+    savedFilter.projectId = event.target.value;
+    setProjectId(event.target.value);
+    setLogs([]);
+    setHasMore(isValidRange);
+    isFetchingRef.current = false;
+  };
+
   const loadLogs = useCallback(async () => {
     if (isFetchingRef.current || !hasMore || !isValidRange || !dateRange.fromDate || !dateRange.toDate) return;
 
@@ -83,6 +94,7 @@ function GeneralLog() {
         end,
         offset: currentOffset,
         status: status || undefined,
+        project_id: projectId || undefined,
       });
 
       if (!response || response.length === 0) {
@@ -101,7 +113,20 @@ function GeneralLog() {
       setLoading(false);
       isFetchingRef.current = false;
     }
-  }, [hasMore, isValidRange, dateRange, logs.length, status]);
+  }, [hasMore, isValidRange, dateRange, logs.length, status, projectId]);
+
+  // 絞り込み用プロジェクト一覧の取得（終了済みを含む。マウント時に一度だけ）
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const res = await getFastAPI().readProjects({ include_inactive: true });
+        setProjects(res || []);
+      } catch (error) {
+        console.error('プロジェクト一覧取得エラー:', error);
+      }
+    };
+    fetchProjects();
+  }, []);
 
   // 表示用のログインユーザー名を取得（マウント時に一度だけ）
   useEffect(() => {
@@ -197,7 +222,22 @@ function GeneralLog() {
           alignItems: 'flex-end',  
         }}
       >
-        <Container maxWidth="md" disableGutters sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Container maxWidth="md" disableGutters sx={{ display: 'flex', justifyContent: 'flex-end', flexWrap: 'wrap', gap: 1.5 }}>
+          <Select
+            size="small"
+            displayEmpty
+            value={projectId}
+            onChange={handleProjectChange}
+            sx={{ minWidth: 140, bgcolor: '#FFFFFF' }}
+          >
+            <MenuItem value="">Project</MenuItem>
+            {projects.map((project) => (
+              <MenuItem key={project.id} value={project.id}>
+                {project.name}
+              </MenuItem>
+            ))}
+          </Select>
+
           <Select
             size="small"
             displayEmpty

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { getFastAPI } from '../../../api/generated/prismApi';
-import type { AdminUserItem } from '../../../api/generated/prismApi.schemas';
+import type { AdminUserItem, ProjectRead } from '../../../api/generated/prismApi.schemas';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
@@ -13,7 +13,7 @@ import DateRangeSelector, { type DateRange } from '../../../components/elements/
 import LogContainer, { type LogItem } from '../../../features/accounting/components/container/logContainer.tsx';
 
 // 画面遷移でコンポーネントが破棄されても絞り込み状態を保持する（メモリ上のみ。リロード・ログアウトで消える）
-const savedFilter = { status: '', userId: '' };
+const savedFilter = { status: '', userId: '', projectId: '' };
 
 function AdminApproval() {
   const navigate = useNavigate();
@@ -28,6 +28,8 @@ function AdminApproval() {
   const [hasMore, setHasMore] = useState(true);
   const [status, setStatus] = useState(savedFilter.status);
   const [userId, setUserId] = useState(savedFilter.userId);
+  const [projectId, setProjectId] = useState(savedFilter.projectId);
+  const [projects, setProjects] = useState<ProjectRead[]>([]);
   const [users, setUsers] = useState<AdminUserItem[]>([]);
 
   // 公開ユーザーコード（usr00001 等）→ 氏名 の変換マップ
@@ -85,6 +87,15 @@ function AdminApproval() {
     isFetchingRef.current = false;
   };
 
+  // プロジェクト選択時のリセット処理
+  const handleProjectChange = (event: SelectChangeEvent) => {
+    savedFilter.projectId = event.target.value;
+    setProjectId(event.target.value);
+    setLogs([]);
+    setHasMore(isValidRange);
+    isFetchingRef.current = false;
+  };
+
   // 絞り込み用ユーザー一覧の取得（マウント時に一度だけ）
   useEffect(() => {
     const fetchUsers = async () => {
@@ -117,6 +128,7 @@ function AdminApproval() {
         offset: currentOffset,
         status: status || undefined,
         user_id: userId || undefined,
+        project_id: projectId || undefined,
       });
 
       if (!response || response.length === 0) {
@@ -141,7 +153,20 @@ function AdminApproval() {
       setLoading(false);
       isFetchingRef.current = false;
     }
-  }, [hasMore, isValidRange, dateRange, logs.length, status, userId]);
+  }, [hasMore, isValidRange, dateRange, logs.length, status, userId, projectId]);
+
+  // 絞り込み用プロジェクト一覧の取得（終了済みを含む。マウント時に一度だけ）
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const res = await getFastAPI().readProjects({ include_inactive: true });
+        setProjects(res || []);
+      } catch (error) {
+        console.error('プロジェクト一覧取得エラー:', error);
+      }
+    };
+    fetchProjects();
+  }, []);
 
   // 無限スクロールの検知設定
   useEffect(() => {
@@ -204,7 +229,7 @@ function AdminApproval() {
           justifyContent: 'flex-end',
         }}
       >
-        <Container maxWidth="md" disableGutters sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
+        <Container maxWidth="md" disableGutters sx={{ display: 'flex', justifyContent: 'flex-end', flexWrap: 'wrap', gap: 1.5 }}>
           <Select
             size="small"
             displayEmpty
@@ -216,6 +241,21 @@ function AdminApproval() {
             {users.map((user) => (
               <MenuItem key={user.id} value={user.id}>
                 {user.name || user.user_id}
+              </MenuItem>
+            ))}
+          </Select>
+
+          <Select
+            size="small"
+            displayEmpty
+            value={projectId}
+            onChange={handleProjectChange}
+            sx={{ minWidth: 140, bgcolor: '#FFFFFF' }}
+          >
+            <MenuItem value="">Project</MenuItem>
+            {projects.map((project) => (
+              <MenuItem key={project.id} value={project.id}>
+                {project.name}
               </MenuItem>
             ))}
           </Select>
