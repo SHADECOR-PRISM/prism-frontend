@@ -230,7 +230,7 @@ export default function TransportRegisterModal({
             fullWidth
             multiline
             rows={2}
-            placeholder="例: 〇〇打ち合わせのため"
+            placeholder="必要に応じて自由に記入して下さい"
             value={formData.remark || ''}
             onChange={(e) => {
               if (e.target.value.length <= 100) {
