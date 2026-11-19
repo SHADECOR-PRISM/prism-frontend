@@ -328,11 +328,16 @@ export interface UserProfile {
 
 export type LoginBody = { [key: string]: unknown };
 
+export type ReadProjectsParams = {
+include_inactive?: boolean;
+};
+
 export type GetContainerMeParams = {
 start: string;
 end: string;
 offset: number;
 status?: string | null;
+project_id?: string | null;
 };
 
 export type GetAdminContainerAllParams = {
@@ -346,6 +351,7 @@ offset?: number;
 limit?: number;
 status?: string | null;
 user_id?: string | null;
+project_id?: string | null;
 };
 
 export type GetAdminContainerByUserParams = {

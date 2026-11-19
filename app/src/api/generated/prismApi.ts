@@ -21,6 +21,7 @@ import type {
   GetContainerMeParams,
   LoginBody,
   ProjectRead,
+  ReadProjectsParams,
   Token,
   UserProfile
 } from './prismApi.schemas';
@@ -98,10 +99,11 @@ const getAdminUsers = (
  * @summary Read Projects
  */
 const readProjects = (
-
+    params?: ReadProjectsParams,
  ) => {
       return customInstance<ProjectRead[]>(
-      {url: `/projects`, method: 'GET'
+      {url: `/projects`, method: 'GET',
+        params
     },
       );
     }
