@@ -11,6 +11,9 @@ import MenuItem from '@mui/material/MenuItem';
 import DateRangeSelector, { type DateRange } from '../../../components/elements/dateRangeSelector.tsx';
 import LogContainer, { type LogItem } from '../../../features/accounting/components/container/logContainer.tsx';
 
+// 画面遷移でコンポーネントが破棄されても絞り込み状態を保持する（メモリ上のみ。リロード・ログアウトで消える）
+const savedFilter = { status: '' };
+
 function GeneralLog() {
   const navigate = useNavigate();
 
@@ -22,7 +25,7 @@ function GeneralLog() {
   const [logs, setLogs] = useState<LogItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState(savedFilter.status);
   const [userName, setUserName] = useState('');
   const [hasRejected, setHasRejected] = useState(false);
 
@@ -57,6 +60,7 @@ function GeneralLog() {
   };
 
   const handleStatusChange = (event: SelectChangeEvent) => {
+    savedFilter.status = event.target.value;
     setStatus(event.target.value);
     setLogs([]);
     setHasMore(isValidRange);
