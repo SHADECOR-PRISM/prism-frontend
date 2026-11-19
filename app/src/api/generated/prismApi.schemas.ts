@@ -83,6 +83,7 @@ export interface TransportDetailCreate {
   departure?: string | null;
   arrival?: string | null;
   is_round_trip?: boolean;
+  remark?: string | null;
   /**
      * 金額は1円以上
      * @exclusiveMinimum 0
@@ -219,6 +220,7 @@ export interface TransportDetailResponse {
   departure?: string | null;
   arrival?: string | null;
   is_round_trip?: boolean;
+  remark?: string | null;
   /**
      * 金額は1円以上
      * @exclusiveMinimum 0
