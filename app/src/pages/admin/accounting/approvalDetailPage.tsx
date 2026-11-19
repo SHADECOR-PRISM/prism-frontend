@@ -140,6 +140,11 @@ export default function ApprovalDetailPage() {
                           ({transportItem.is_round_trip ? '往復' : '片道'})
                         </Typography>
                       </Typography>
+                      {transportItem.remark && (
+                        <Typography variant="body2" color="text.primary" sx={{ mb: 1, whiteSpace: 'pre-wrap' }}>
+                          {transportItem.remark}
+                        </Typography>
+                      )}
                       <Typography variant="h6" align="right" sx={{ fontWeight: 'bold', color: '#2C3E50' }}>
                         ¥{transportItem.amount.toLocaleString()}
                       </Typography>
