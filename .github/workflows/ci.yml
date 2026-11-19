@@ -2,8 +2,6 @@ name: frontend-ci
 
 on:
   pull_request:
-    paths:
-      - "app/**"
 
 jobs:
   lint-and-build:
